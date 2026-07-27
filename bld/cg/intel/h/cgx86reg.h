@@ -250,6 +250,15 @@ HW_GPRS64_##x =                                                    \
 HW_XMMS_##x =                                                      \
     (HW_XMM0_##x+HW_XMM1_##x+HW_XMM2_##x+HW_XMM3_##x+HW_XMM4_##x+HW_XMM5_##x+HW_XMM6_##x+HW_XMM7_##x+ \
      HW_XMM8_##x+HW_XMM9_##x+HW_XMM10_##x+HW_XMM11_##x+HW_XMM12_##x+HW_XMM13_##x+HW_XMM14_##x+HW_XMM15_##x), \
+HW_GPRS8_##x =                                                     \
+    (HW_AL_##x+HW_BL_##x+HW_CL_##x+HW_DL_##x+HW_SIL_##x+HW_DIL_##x+HW_BPL_##x+HW_SPL_##x+ \
+     HW_R8B_##x+HW_R9B_##x+HW_R10B_##x+HW_R11B_##x+HW_R12B_##x+HW_R13B_##x+HW_R14B_##x+HW_R15B_##x), \
+HW_GPRS16_##x =                                                    \
+    (HW_AX_##x+HW_BX_##x+HW_CX_##x+HW_DX_##x+HW_SI_##x+HW_DI_##x+HW_BP_##x+HW_SP_##x+ \
+     HW_R8W_##x+HW_R9W_##x+HW_R10W_##x+HW_R11W_##x+HW_R12W_##x+HW_R13W_##x+HW_R14W_##x+HW_R15W_##x), \
+HW_GPRS32_##x =                                                    \
+    (HW_EAX_##x+HW_EBX_##x+HW_ECX_##x+HW_EDX_##x+HW_ESI_##x+HW_EDI_##x+HW_EBP_##x+HW_ESP_##x+ \
+     HW_R8D_##x+HW_R9D_##x+HW_R10D_##x+HW_R11D_##x+HW_R12D_##x+HW_R13D_##x+HW_R14D_##x+HW_R15D_##x), \
                                                                     \
 HW__COMPOUND_END_##x                                                \
 }
@@ -345,6 +354,11 @@ HW_DEFINE_GLOBAL_CONST( HW_XMM12 );
 HW_DEFINE_GLOBAL_CONST( HW_XMM13 );
 HW_DEFINE_GLOBAL_CONST( HW_XMM14 );
 HW_DEFINE_GLOBAL_CONST( HW_XMM15 );
+HW_DEFINE_GLOBAL_CONST( HW_GPRS8 );
+HW_DEFINE_GLOBAL_CONST( HW_GPRS16 );
+HW_DEFINE_GLOBAL_CONST( HW_GPRS32 );
+HW_DEFINE_GLOBAL_CONST( HW_GPRS64 );
+HW_DEFINE_GLOBAL_CONST( HW_XMMS );
 #endif
 
 #define MAX_POSSIBLE_REG        8
