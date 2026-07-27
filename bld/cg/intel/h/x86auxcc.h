@@ -58,4 +58,9 @@ typedef enum {
     FECALL_X86_PARMS_STACK_RESERVE      = 0x00400000,
     FECALL_X86_PARMS_PREFER_REGS        = 0x00800000,
     FECALL_X86_NEEDS_BP_CHAIN           = 0x01000000,
+    FECALL_X64_WIN64_CC                  = 0x02000000,
+    FECALL_X64_SYSV_CC                   = 0x04000000,
 } call_class_target;
+
+#define FECALL_X64_CC_MASK \
+    (FECALL_X64_WIN64_CC | FECALL_X64_SYSV_CC)
