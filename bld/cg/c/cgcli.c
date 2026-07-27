@@ -83,6 +83,8 @@ bool _CGAPI BELoad( cchar_ptr dll_name )
     if( dll_name == NULL ) {
 #if _TARGET & _TARG_8086
         dll_name = "cgi86.dll";
+#elif _TARGET & _TARG_X64
+        dll_name = "cgx64.dll";
 #elif _TARGET & _TARG_80386
         dll_name = "cg386.dll";
 #elif _TARGET & _TARG_AXP

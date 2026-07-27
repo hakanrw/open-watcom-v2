@@ -1,0 +1,10 @@
+#define HW_xAX      HW_RAX
+#define HW_xBX      HW_RBX
+#define HW_xCX      HW_RCX
+#define HW_xDX      HW_RDX
+#define HW_xSI      HW_RSI
+#define HW_xDI      HW_RDI
+#define HW_xBP      HW_RBP
+#define HW_xSP      HW_RSP
+#define HW_DS_xSI   HW_DS_RSI
+#define HW_ES_xDI   HW_ES_RDI

@@ -40,7 +40,7 @@
 #if _TARGET & _TARG_8086
     typedef int_16      type_length;
     #define MAX_TYPE_LENGTH 0x7fff
-#elif _TARGET & _TARG_80386
+#elif (_TARGET & _TARG_X64) || (_TARGET & _TARG_80386)
     typedef int_32      type_length;
     #define MAX_TYPE_LENGTH 0x7fffffff
 #elif _TARGET & _TARG_370

@@ -217,7 +217,8 @@ enum {
     II_TARG_370,
     II_TARG_AXP,
     II_TARG_PPC,
-    II_TARG_MIPS
+    II_TARG_MIPS,
+    II_TARG_X64
 };
 
 #define II_REVISION     9

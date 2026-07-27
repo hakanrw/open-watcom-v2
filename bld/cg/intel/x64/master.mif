@@ -1,0 +1,12 @@
+tree_depth = 5
+
+target_cpu = x64
+target_cls = intel
+
+# Do not inherit the 16/32-bit encoder or its OMF object writer.
+x64_objs =
+
+inc_dirs_targ = -I"$(cg_dir)/$(target_cls)/$(target_cpu)/h" -I"$(cg_dir)/$(target_cls)/h"
+src_path = $(cg_dir)/$(target_cls)/$(target_cpu)/c;$(cg_dir)/$(target_cls)/c
+
+!include $(cg_dir)/mif/master.mif

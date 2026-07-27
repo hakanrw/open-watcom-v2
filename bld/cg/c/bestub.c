@@ -53,6 +53,8 @@ extern  cg_init_info    BEInit(cg_switches switches, cg_target_switches tg_switc
     cg_info.revision = II_REVISION;
 #if _TARGET & _TARG_8086
     cg_info.target = II_TARG_8086;
+#elif _TARGET & _TARG_X64
+    cg_info.target = II_TARG_X64;
 #else
     cg_info.target = II_TARG_80386;
 #endif

@@ -135,6 +135,8 @@ extern  cg_init_info    BEInit( cg_switches cg_data, cg_target_switches tg_data,
     cg_info.revision = II_REVISION;
 #if _TARGET & _TARG_8086
     cg_info.target = II_TARG_8086;
+#elif _TARGET & _TARG_X64
+    cg_info.target = II_TARG_X64;
 #elif _TARGET & _TARG_80386
     cg_info.target = II_TARG_80386;
 #elif _TARGET & _TARG_AXP

@@ -139,7 +139,7 @@ cg_init_info _CGAPI     BEInitCg( cg_switches switches,
     if( !_CPULevel( CPU_386 ) ) {
         platform &= ~(CGSW_X86_FLOATING_FS | CGSW_X86_FLOATING_GS);
     }
-#elif  _TARGET & _TARG_80386
+#elif (_TARGET & _TARG_X64) || (_TARGET & _TARG_80386)
     if( !_CPULevel( CPU_386 ) ) {
         SET_CPU( proc, CPU_386 );
     }
@@ -168,6 +168,8 @@ cg_init_info _CGAPI     BEInitCg( cg_switches switches,
         cg_info.revision = II_REVISION;
 #if _TARGET & _TARG_8086
         cg_info.target = II_TARG_8086;
+#elif _TARGET & _TARG_X64
+        cg_info.target = II_TARG_X64;
 #elif _TARGET & _TARG_80386
         cg_info.target = II_TARG_80386;
 #elif _TARGET & _TARG_370
