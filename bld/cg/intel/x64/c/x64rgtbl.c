@@ -52,6 +52,16 @@ static const hw_reg_set ByteRegs[] = {
     HW_D_1( HW_EMPTY )
 };
 
+static const hw_reg_set ByteParmRegs[] = {
+    HW_D_1( HW_DIL ),
+    HW_D_1( HW_SIL ),
+    HW_D_1( HW_DL ),
+    HW_D_1( HW_CL ),
+    HW_D_1( HW_R8B ),
+    HW_D_1( HW_R9B ),
+    HW_D_1( HW_EMPTY )
+};
+
 static const hw_reg_set AXReg[] = {
     HW_D_1( HW_AX ),
     HW_D_1( HW_EMPTY )
@@ -79,6 +89,16 @@ static const hw_reg_set WordRegs[] = {
     HW_D_1( HW_R13W ),
     HW_D_1( HW_R14W ),
     HW_D_1( HW_R15W ),
+    HW_D_1( HW_EMPTY )
+};
+
+static const hw_reg_set WordParmRegs[] = {
+    HW_D_1( HW_DI ),
+    HW_D_1( HW_SI ),
+    HW_D_1( HW_DX ),
+    HW_D_1( HW_CX ),
+    HW_D_1( HW_R8W ),
+    HW_D_1( HW_R9W ),
     HW_D_1( HW_EMPTY )
 };
 
@@ -114,6 +134,16 @@ static const hw_reg_set DWordRegs[] = {
     HW_D_1( HW_R13D ),
     HW_D_1( HW_R14D ),
     HW_D_1( HW_R15D ),
+    HW_D_1( HW_EMPTY )
+};
+
+static const hw_reg_set DWordParmRegs[] = {
+    HW_D_1( HW_EDI ),
+    HW_D_1( HW_ESI ),
+    HW_D_1( HW_EDX ),
+    HW_D_1( HW_ECX ),
+    HW_D_1( HW_R8D ),
+    HW_D_1( HW_R9D ),
     HW_D_1( HW_EMPTY )
 };
 
@@ -154,6 +184,16 @@ static const hw_reg_set QWordRegs[] = {
     HW_D_1( HW_R13 ),
     HW_D_1( HW_R14 ),
     HW_D_1( HW_R15 ),
+    HW_D_1( HW_EMPTY )
+};
+
+static const hw_reg_set QWordParmRegs[] = {
+    HW_D_1( HW_RDI ),
+    HW_D_1( HW_RSI ),
+    HW_D_1( HW_RDX ),
+    HW_D_1( HW_RCX ),
+    HW_D_1( HW_R8 ),
+    HW_D_1( HW_R9 ),
     HW_D_1( HW_EMPTY )
 };
 
@@ -291,9 +331,27 @@ reg_set_index RegIntersect( reg_set_index left, reg_set_index right )
 
 const hw_reg_set *ParmChoices( type_class_def type_class )
 {
-    if( type_class >= XX )
+    switch( type_class ) {
+    case U1:
+    case I1:
+        return( ByteParmRegs );
+    case U2:
+    case I2:
+        return( WordParmRegs );
+    case U4:
+    case I4:
+        return( DWordParmRegs );
+    case U8:
+    case I8:
+    case CP:
+    case PT:
+        return( QWordParmRegs );
+    case FS:
+    case FD:
+        return( XMMRegs );
+    default:
         return( Empty );
-    return( RegSets[ClassSets[type_class]] );
+    }
 }
 
 hw_reg_set InLineParm( hw_reg_set regs, hw_reg_set used )
@@ -310,13 +368,17 @@ hw_reg_set StructReg( void )
 
 hw_reg_set ReturnReg( type_class_def type_class, bool use_87 )
 {
-    /* x64 floating-point returns never use the x87 stack. */
+    /*
+     * FL needs the SysV x87 return path, which is not part of the scalar
+     * GPR/XMM implementation yet.  Win64 front ends represent long double
+     * as FD.
+     */
     (void)use_87;
     switch( type_class ) {
     case FS:
     case FD:
-    case FL:
         return( HW_XMM0 );
+    case FL:
     case XX:
         return( HW_EMPTY );
     default:

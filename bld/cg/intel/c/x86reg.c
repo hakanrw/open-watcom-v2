@@ -75,6 +75,12 @@ type_class_def  CallState( aux_handle aux, const type_def *tipe, call_state *sta
     state->attr = ROUTINE_REMOVES_PARMS;
     cclass = (call_class)(pointer_uint)FEAuxInfo( aux, FEINF_CALL_CLASS );
     cclass_target = (call_class_target)(pointer_uint)FEAuxInfo( aux, FEINF_CALL_CLASS_TARGET );
+    if( cclass_target & FECALL_X64_WIN64_CC ) {
+        state->attr |= ROUTINE_X64_WIN64_CC;
+    }
+    if( cclass_target & FECALL_X64_SYSV_CC ) {
+        state->attr |= ROUTINE_X64_SYSV_CC;
+    }
     if( cclass_target & FECALL_X86_INTERRUPT ) {
         state->attr |= ROUTINE_INTERRUPT;
     } else if( cclass_target & FECALL_X86_FAR_CALL ) {

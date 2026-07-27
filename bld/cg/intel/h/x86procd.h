@@ -56,6 +56,8 @@ typedef enum {
         ROUTINE_PREFER_REGS             = 0x00040000,
         ROUTINE_FARSS                   = 0x00080000,
         ROUTINE_NEEDS_BP_CHAIN          = 0x00100000,
+        ROUTINE_X64_WIN64_CC             = 0x00200000,
+        ROUTINE_X64_SYSV_CC              = 0x00400000,
 } call_attributes;
 
 #define _RoutineIsLong( x ) \
