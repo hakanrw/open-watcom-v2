@@ -990,6 +990,8 @@ void GenCOptions( char **cmdline )
     ProcOptions( &data, FEGetEnv( "WCC" ) );
 #elif _CPU == 386
     ProcOptions( &data, FEGetEnv( "WCC386" ) );
+#elif _CPU == _X64
+    ProcOptions( &data, FEGetEnv( "WCCX64" ) );
 #elif _CPU == _AXP
     ProcOptions( &data, FEGetEnv( "WCCAXP" ) );
 #elif _CPU == _PPC

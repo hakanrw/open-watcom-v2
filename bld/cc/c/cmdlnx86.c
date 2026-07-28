@@ -52,11 +52,16 @@
     #define UMX86   "_M_I86"
     #define IMX86   "M_I86"
     #define UIMX86  "_M_I86"
-#else
+#elif _CPU == 386
     #define MX86    "M_386"
     #define UMX86   "_M_386"
     #define IMX86   "M_I386"
     #define UIMX86  "_M_I386"
+#else
+    #define MX86    "M_X64"
+    #define UMX86   "_M_X64"
+    #define IMX86   "M_X64"
+    #define UIMX86  "_M_X64"
 #endif
 
 #ifdef DEVBUILD
@@ -75,9 +80,12 @@ void CmdSysInit( void )
 #if _CPU == 8086
     TargetSwitches = 0;
     PackAmount = TARGET_INT;                /* pack structs on word boundaries */
-#else
+#elif _CPU == 386
     TargetSwitches = CGSW_X86_USE_32;
     PackAmount = 8;
+#else
+    TargetSwitches = 0;
+    PackAmount = 16;
 #endif
     GblPackAmount = PackAmount;
     DataThreshold = TARGET_INT_MAX;
@@ -362,6 +370,15 @@ static void setIntelArchitecture( OPT_STORAGE *data )
 
 static void SetDftCallConv( OPT_STORAGE *data )
 {
+#if _CPU == _X64
+    /* The environment chooses the default; #pragma aux may select the other. */
+    (void)data;
+    if( TargetSwitches & CGSW_X64_ENV_SYSV ) {
+        DftCallConv = &SysVInfo;
+    } else {
+        DftCallConv = &Win64Info;
+    }
+#else
     /*
      * default is Watcom calling convention
      */
@@ -395,7 +412,20 @@ static void SetDftCallConv( OPT_STORAGE *data )
         DbgNever();
         break;
     }
+#endif
 }
+
+#if _CPU == _X64
+static void SetX64Environment( void )
+{
+    TargetSwitches &= ~CGSW_X64_ENV_MASK;
+    if( TargetSystem == TS_NT ) {
+        TargetSwitches |= CGSW_X64_ENV_WIN64;
+    } else {
+        TargetSwitches |= CGSW_X64_ENV_SYSV;
+    }
+}
+#endif
 
 static void SetFinalTargetSystem( OPT_STORAGE *data, char *target_name )
 {
@@ -416,9 +446,13 @@ static void SetFinalTargetSystem( OPT_STORAGE *data, char *target_name )
     PreDefine_Macro( "_X86_" );
 #if _CPU == 8086
     PreDefine_Macro( "__I86__" );
-#else
+#elif _CPU == 386
     PreDefine_Macro( "__386__" );
     PreDefine_Macro( "_STDCALL_SUPPORTED" );
+#else
+    PreDefine_Macro( "__X64__" );
+    PreDefine_Macro( "__x86_64__" );
+    PreDefine_Macro( "_M_X64=100" );
 #endif
     PreDefine_Macro( "__WATCOM_INT64__" );
     PreDefine_Macro( "_INTEGRAL_MAX_BITS=64" );
@@ -445,7 +479,7 @@ static void SetFinalTargetSystem( OPT_STORAGE *data, char *target_name )
         PreDefine_Macro( "__WINDOWS_386__" );
 #endif
         break;
-#if _CPU == 386
+#if _CPU == 386 || _CPU == _X64
     case TS_NETWARE5:
         PreDefine_Macro( "__NETWARE5__" );
         /* fall through */
@@ -457,6 +491,9 @@ static void SetFinalTargetSystem( OPT_STORAGE *data, char *target_name )
         break;
     case TS_NT:
         PreDefine_Macro( "_WIN32" );
+#if _CPU == _X64
+        PreDefine_Macro( "_WIN64" );
+#endif
         break;
     case TS_LINUX:
     case TS_UNIX:
@@ -1209,6 +1246,9 @@ void CmdSysAnalyse( OPT_STORAGE *data )
     char        *target_name;
 
     target_name = setTargetSystem( data );
+#if _CPU == _X64
+    SetX64Environment();
+#endif
     setIntelArchitecture( data );
     SetDebugInfoFormat( data );
     SetGenSwitches( data );

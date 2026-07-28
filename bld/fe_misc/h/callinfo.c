@@ -90,7 +90,22 @@ static  hw_reg_set  FastcallParms[] = {
     HW_D( HW_EMPTY )
 };
 
-  #if _CPU == 386
+  #if _CPU == _X64
+static hw_reg_set Win64Parms[] = {
+    HW_D_2( HW_RCX, HW_XMM0 ),
+    HW_D_2( HW_RDX, HW_XMM1 ),
+    HW_D_2( HW_R8,  HW_XMM2 ),
+    HW_D_2( HW_R9,  HW_XMM3 ),
+    HW_D( HW_EMPTY )
+};
+
+static hw_reg_set SysVParms[] = {
+    HW_D_2( HW_GPRS64, HW_XMMS ),
+    HW_D( HW_EMPTY )
+};
+  #endif
+
+  #if _CPU == 386 || _CPU == _X64
 static  hw_reg_set  MetaWareParms[] = {
     HW_D( HW_EMPTY )
 };
@@ -378,6 +393,50 @@ void AuxInfoInit( int flag_stdatnum )
     Far16PascalInfo.parms = StackParms;
     Far16PascalInfo.objname = AUX_STRALLOC( PascalInfo.objname );
   #endif
+
+  #if _CPU == _X64
+    Win64Info.cclass = FECALL_GEN_CALLER_POPS | FECALL_GEN_NONE;
+    Win64Info.cclass_target = FECALL_X64_WIN64_CC;
+    Win64Info.parms = Win64Parms;
+    Win64Info.objname = AUX_STRALLOC( "*" );
+    HW_CAsgn( Win64Info.returns, HW_EMPTY );
+    HW_CAsgn( Win64Info.streturn, HW_EMPTY );
+    HW_CAsgn( Win64Info.save, HW_EMPTY );
+    HW_CTurnOn( Win64Info.save, HW_RBX );
+    HW_CTurnOn( Win64Info.save, HW_RBP );
+    HW_CTurnOn( Win64Info.save, HW_RSI );
+    HW_CTurnOn( Win64Info.save, HW_RDI );
+    HW_CTurnOn( Win64Info.save, HW_RSP );
+    HW_CTurnOn( Win64Info.save, HW_R12 );
+    HW_CTurnOn( Win64Info.save, HW_R13 );
+    HW_CTurnOn( Win64Info.save, HW_R14 );
+    HW_CTurnOn( Win64Info.save, HW_R15 );
+    HW_CTurnOn( Win64Info.save, HW_XMM6 );
+    HW_CTurnOn( Win64Info.save, HW_XMM7 );
+    HW_CTurnOn( Win64Info.save, HW_XMM8 );
+    HW_CTurnOn( Win64Info.save, HW_XMM9 );
+    HW_CTurnOn( Win64Info.save, HW_XMM10 );
+    HW_CTurnOn( Win64Info.save, HW_XMM11 );
+    HW_CTurnOn( Win64Info.save, HW_XMM12 );
+    HW_CTurnOn( Win64Info.save, HW_XMM13 );
+    HW_CTurnOn( Win64Info.save, HW_XMM14 );
+    HW_CTurnOn( Win64Info.save, HW_XMM15 );
+
+    SysVInfo.cclass = FECALL_GEN_CALLER_POPS | FECALL_GEN_NONE;
+    SysVInfo.cclass_target = FECALL_X64_SYSV_CC;
+    SysVInfo.parms = SysVParms;
+    SysVInfo.objname = AUX_STRALLOC( "*" );
+    HW_CAsgn( SysVInfo.returns, HW_EMPTY );
+    HW_CAsgn( SysVInfo.streturn, HW_EMPTY );
+    HW_CAsgn( SysVInfo.save, HW_EMPTY );
+    HW_CTurnOn( SysVInfo.save, HW_RBX );
+    HW_CTurnOn( SysVInfo.save, HW_RBP );
+    HW_CTurnOn( SysVInfo.save, HW_RSP );
+    HW_CTurnOn( SysVInfo.save, HW_R12 );
+    HW_CTurnOn( SysVInfo.save, HW_R13 );
+    HW_CTurnOn( SysVInfo.save, HW_R14 );
+    HW_CTurnOn( SysVInfo.save, HW_R15 );
+  #endif
 }
 
   #if _CPU == 386
@@ -414,7 +473,13 @@ int IsAuxParmsBuiltIn( hw_reg_set *parms )
         return( true );
     } else if( parms == FastcallParms ) {
         return( true );
-  #if _CPU == 386
+  #if _CPU == _X64
+    } else if( parms == Win64Parms ) {
+        return( true );
+    } else if( parms == SysVParms ) {
+        return( true );
+  #endif
+  #if _CPU == 386 || _CPU == _X64
     } else if( parms == OptlinkParms ) {
         return( true );
     } else if( parms == MetaWareParms ) {
@@ -479,6 +544,12 @@ int IsAuxInfoBuiltIn( aux_info *inf )
         return( true );
     if( inf == &OptlinkInfo )
         return( true );
+#if _CPU == _X64
+    if( inf == &Win64Info )
+        return( true );
+    if( inf == &SysVInfo )
+        return( true );
+#endif
 #if _CPU == 386
     if( inf == &Far16PascalInfo )
         return( true );
@@ -507,5 +578,9 @@ char *VarNamePattern( aux_info *inf )
         return( "^" );
     if( inf == &SyscallInfo || inf == &OptlinkInfo )
         return( "*" );
+#if _CPU == _X64
+    if( inf == &Win64Info || inf == &SysVInfo )
+        return( "*" );
+#endif
     return( inf->objname );
 }

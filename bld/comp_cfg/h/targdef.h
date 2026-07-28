@@ -46,12 +46,13 @@
 #define _PPC    2
 #define _SPARC  3
 #define _MIPS   4
+#define _X64    64
 #define _370    370     // on a IBM S370
 #define _80286  286     // >= 286 running 16-bit protected-mode ( OS/2 or DOS/16M )
 #define _80386  386     // >= 386 running 32-bit
 #define _8086   8086    // >= 8086 machine 16-bit real-mode
 
-#define _INTEL_CPU      ( _CPU == 8086 || _CPU == 386 )
+#define _INTEL_CPU      ( _CPU == 8086 || _CPU == 386 || _CPU == _X64 )
 #define _RISC_CPU       ( _CPU == _AXP || _CPU == _PPC || _CPU == _MIPS )
 
 #if 0

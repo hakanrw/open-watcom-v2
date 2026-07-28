@@ -1,0 +1,4 @@
+target_cpu = x64
+cc_ntverrc = ../../386
+
+!include ../../master.mif

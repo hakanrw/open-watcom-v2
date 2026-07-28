@@ -6,7 +6,9 @@ cc_autodepends = .AUTODEPEND
 
 cc_wreslib_cli = incl_msgtext
 
+!ifndef cc_ntverrc
 cc_ntverrc = ..
+!endif
 
 cc_qnx_usage = 1
 
@@ -173,6 +175,11 @@ codeppc.gh :
 codemps.gh :
     echo // Dummy file > $@
 
+!else ifeq target_cpu x64
+
+codex64.gh :
+    echo // Dummy file > $@
+
 !else  # Intel i86 or 386
 
 code$(target_cpu).gh : ./mkcode.exe xcode$(target_cpu).tmp
@@ -217,7 +224,8 @@ weights.gh keywords.gh : $(key_objs)
 # optencod options and targets for various hosts
 #optencod_enc_linux  = -utf8
 
-optencod_targets = $(target_cpu) $(host_os)
+optencod_compat_target_x64 = 386
+optencod_targets = $(target_cpu) $(optencod_compat_target_$(target_cpu)) $(host_os)
 !ifeq debug 2
 optencod_targets += dbg
 !endif

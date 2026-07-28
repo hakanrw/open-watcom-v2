@@ -81,6 +81,10 @@ void PragmaAuxInit( void )
     OptlinkInfo = WatcallInfo;
     FortranInfo = WatcallInfo;
     FastcallInfo= WatcallInfo;
+#if _CPU == _X64
+    Win64Info   = WatcallInfo;
+    SysVInfo    = WatcallInfo;
+#endif
 
 #if _INTEL_CPU
     AuxInfoInit( CompFlags.use_stdcall_at_number );
@@ -118,6 +122,10 @@ void PragmaAuxFini( void )
     FreeAuxInfo( &FortranInfo );
     FreeAuxInfo( &StdcallInfo );
     FreeAuxInfo( &FastcallInfo );
+#if _CPU == _X64
+    FreeAuxInfo( &Win64Info );
+    FreeAuxInfo( &SysVInfo );
+#endif
 #if _CPU == 386
     FreeAuxInfo( &Far16CdeclInfo );
     FreeAuxInfo( &Far16PascalInfo );

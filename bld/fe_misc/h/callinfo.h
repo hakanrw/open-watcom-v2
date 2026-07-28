@@ -79,9 +79,12 @@ typedef struct aux_info {
   #if _CPU == 386
 #define Far16CdeclInfo   BuiltinAuxInfo[9]
 #define Far16PascalInfo  BuiltinAuxInfo[10]
+  #elif _CPU == _X64
+#define Win64Info        BuiltinAuxInfo[9]
+#define SysVInfo         BuiltinAuxInfo[10]
   #endif
 
-  #if _CPU == 386
+  #if _CPU == 386 || _CPU == _X64
 #define MAX_BUILTIN_AUXINFO (9 + 2)
   #else
 #define MAX_BUILTIN_AUXINFO 9

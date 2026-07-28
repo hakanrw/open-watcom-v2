@@ -40,3 +40,7 @@ pick( M_FASTCALL, "__fastcall",  "__FASTCALL", &FastcallInfo )
 pick( M_OPTLINK,  "__optlink",   "__OPTLINK",  &OptlinkInfo  )
 pick( M_SYSTEM,   "__system",    "__SYSTEM",   &SyscallInfo  )
 pick( M_WATCALL,  "__watcall",   "__WATCALL",  &WatcallInfo  )
+#if _CPU == _X64
+pick( M_WIN64,    "__win64",     "__WIN64",    &Win64Info    )
+pick( M_SYSV,     "__sysv",      "__SYSV",     &SysVInfo     )
+#endif

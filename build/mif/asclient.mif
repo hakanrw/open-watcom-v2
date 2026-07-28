@@ -4,6 +4,8 @@
 
 asclient_wasm_i86 = 1
 asclient_wasm_386 = 1
+# Reuse pragma-aux parsing support; x64 instruction encoding is not enabled yet.
+asclient_wasm_x64 = 1
 asclient_as_axp = 1
 asclient_as_mps = 1
 asclient_as_ppc = 1
