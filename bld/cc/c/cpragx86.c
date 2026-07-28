@@ -251,13 +251,16 @@ static fix_words FixupKeyword( void )
 
 
 #if _CPU == 8086
-    #define SYM_INT     SYM_INT2
     #define SYM_FFAR    SYM_FAR2
     #define SYM_FNEAR   SYM_NEAR2
     #define SYM_DFAR    SYM_INT4
     #define SYM_DNEAR   SYM_INT2
+#elif _CPU == _X64
+    #define SYM_FFAR    SYM_FAR4
+    #define SYM_FNEAR   SYM_NEAR4
+    #define SYM_DFAR    SYM_INT8
+    #define SYM_DNEAR   SYM_INT8
 #else
-    #define SYM_INT     SYM_INT4
     #define SYM_FFAR    SYM_FAR4
     #define SYM_FNEAR   SYM_NEAR2
     #define SYM_DFAR    SYM_INT6
@@ -297,14 +300,48 @@ static int AsmPtrType( TYPEPTR typ, type_modifiers flags )
     }
 }
 
-/*
- * matches enum DataType in ctypes.h
- */
-static enum sym_type AsmDataType[] = {
-    #define pick1(type,dtype,cgtype,x86asmtype,name,size) x86asmtype,
-    #include "cdatatyp.h"
-    #undef  pick1
-};
+static enum sym_type AsmSizedType( target_size size, bool floating )
+{
+    switch( size ) {
+    case 1:
+        return( SYM_INT1 );
+    case 2:
+        return( SYM_INT2 );
+    case 4:
+        return( floating ? SYM_FLOAT4 : SYM_INT4 );
+    case 6:
+        return( SYM_INT6 );
+    case 8:
+        return( floating ? SYM_FLOAT8 : SYM_INT8 );
+    case 10:
+        return( SYM_FLOAT10 );
+    case 16:
+        return( SYM_FLOAT16 );
+    }
+    return( SYM_EMPTY );
+}
+
+static enum sym_type AsmScalarType( DATA_TYPE dtype )
+{
+    bool        floating;
+
+    switch( dtype ) {
+    case TYP_FLOAT:
+    case TYP_DOUBLE:
+    case TYP_LONG_DOUBLE:
+    case TYP_FIMAGINARY:
+    case TYP_DIMAGINARY:
+    case TYP_LDIMAGINARY:
+        floating = true;
+        break;
+    case TYP_VOID:
+        return( SYM_INT1 );
+    default:
+        floating = false;
+        break;
+    }
+    return( AsmSizedType( CTypeSize( dtype ), floating ) );
+}
 
 static int AsmType( TYPEPTR typ, type_modifiers flags )
 /****************************************************/
@@ -318,7 +355,7 @@ static int AsmType( TYPEPTR typ, type_modifiers flags )
         return( AsmType( typ->object, flags ) );
     case TYP_FIELD:
     case TYP_UFIELD:
-        return( AsmDataType[typ->u.f.field_type] );
+        return( AsmScalarType( typ->u.f.field_type ) );
     case TYP_FUNCTION:
         return( AsmCodePtrType( flags ) );
     case TYP_POINTER:
@@ -327,7 +364,7 @@ static int AsmType( TYPEPTR typ, type_modifiers flags )
         typ = typ->object;
         /* fall through */
     default:
-        return( AsmDataType[typ->decl_type] );
+        return( AsmScalarType( typ->decl_type ) );
     }
 }
 

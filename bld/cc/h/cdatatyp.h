@@ -2,7 +2,7 @@
 *
 *                            Open Watcom Project
 *
-* Copyright (c) 2023-2024 The Open Watcom Contributors. All Rights Reserved.
+* Copyright (c) 2023-2026 The Open Watcom Contributors. All Rights Reserved.
 *    Portions Copyright (c) 1983-2002 Sybase, Inc. All Rights Reserved.
 *
 *  ========================================================================
@@ -25,49 +25,46 @@
 *
 *  ========================================================================
 *
-* Description:  C data type related definition
+* Description:  C frontend data type properties.
 *
 ****************************************************************************/
 
 /*
- * it is used in definition for
- * CGDataType[] table in  cgen.c
- * AsmDataType[] table in cpragx86.c
- * CTypenames[] table in  cdump.c
- * CTypeSizes[] table in  ctype.c
+ * Code-generator, assembler, and data-initializer types are derived at
+ * their respective handoff points.
  */
 
-/*      type             dtype            cgtype          asmtype       name                     size */
-pick1( TYP_BOOL,        QDT_BOOL,        TY_UINT_1,       SYM_INT1,    "_Bool",                  TARGET_BOOL        )
-pick1( TYP_CHAR,        QDT_CHAR,        TY_INT_1,        SYM_INT1,    "signed char",            TARGET_CHAR        )
-pick1( TYP_UCHAR,       QDT_UCHAR,       TY_UINT_1,       SYM_INT1,    "unsigned char",          TARGET_CHAR        )
-pick1( TYP_SHORT,       QDT_SHORT,       TY_INT_2,        SYM_INT2,    "short",                  TARGET_SHORT       )
-pick1( TYP_USHORT,      QDT_USHORT,      TY_UINT_2,       SYM_INT2,    "unsigned short",         TARGET_SHORT       )
-pick1( TYP_INT,         QDT_INT,         TY_INTEGER,      SYM_INT,     "int",                    TARGET_INT         )
-pick1( TYP_UINT,        QDT_UINT,        TY_UNSIGNED,     SYM_INT,     "unsigned int",           TARGET_INT         )
-pick1( TYP_LONG,        QDT_LONG,        TY_INT_4,        SYM_INT4,    "long",                   TARGET_LONG        )
-pick1( TYP_ULONG,       QDT_ULONG,       TY_UINT_4,       SYM_INT4,    "unsigned long",          TARGET_LONG        )
-pick1( TYP_LONG64,      QDT_LONG64,      TY_INT_8,        SYM_INT8,    "__int64",                TARGET_LONG64      )
-pick1( TYP_ULONG64,     QDT_ULONG64,     TY_UINT_8,       SYM_INT8,    "unsigned __int64",       TARGET_LONG64      )
-pick1( TYP_FLOAT,       QDT_FLOAT,       TY_SINGLE,       SYM_FLOAT4,  "float",                  TARGET_FLOAT       )
-pick1( TYP_DOUBLE,      QDT_DOUBLE,      TY_DOUBLE,       SYM_FLOAT8,  "double",                 TARGET_DOUBLE      )
-pick1( TYP_LONG_DOUBLE, QDT_LONG_DOUBLE, TY_LONG_DOUBLE,  SYM_FLOAT10, "long double",            TARGET_LDOUBLE     )
-pick1( TYP_FIMAGINARY,  QDT_FIMAGINARY,  TY_SINGLE,       SYM_FLOAT4,  "float _Imaginary",       TARGET_FIMAGINARY  )
-pick1( TYP_DIMAGINARY,  QDT_DIMAGINARY,  TY_DOUBLE,       SYM_FLOAT8,  "double _Imaginary",      TARGET_DIMAGINARY  )
-pick1( TYP_LDIMAGINARY, QDT_LDIMAGINARY, TY_LONG_DOUBLE,  SYM_FLOAT10, "long double _Imaginary", TARGET_LDIMAGINARY )
-pick1( TYP_POINTER,     QDT_POINTER,     TY_POINTER,      0,           "pointer",                0                  )
-pick1( TYP_ARRAY,       QDT_ARRAY,       TY_POINTER,      0,           "array",                  0                  )
-pick1( TYP_STRUCT,      QDT_STRUCT,      TY_POINTER,      0,           "struct",                 0                  )
-pick1( TYP_UNION,       QDT_UNION,       TY_POINTER,      0,           "union",                  0                  )
-pick1( TYP_FUNCTION,    QDT_FUNCTION,    TY_DEFAULT,      0,           "function",               0                  )
-pick1( TYP_FIELD,       QDT_FIELD,       TY_DEFAULT,      0,           "<field>",                0                  )
-pick1( TYP_VOID,        QDT_VOID,        TY_INTEGER,      SYM_INT1,    "void",                   0                  )
-pick1( TYP_ENUM,        QDT_ENUM,        TY_INTEGER,      0,           "enum",                   0                  )
-pick1( TYP_TYPEDEF,     QDT_TYPEDEF,     TY_INTEGER,      0,           "<typdef>",               0                  )
-pick1( TYP_UFIELD,      QDT_UFIELD,      TY_INTEGER,      0,           "<ufield>",               0                  )
-pick1( TYP_DOT_DOT_DOT, QDT_DOT_DOT_DOT, TY_INTEGER,      0,           "...",                    0                  )
-pick1( TYP_PLAIN_CHAR,  QDT_PLAIN_CHAR,  TY_INTEGER,      SYM_INT1,    "<char>",                 TARGET_CHAR        )
-pick1( TYP_WCHAR,       QDT_WCHAR,       TY_INTEGER,      SYM_INT2,    "<wide char>",            TARGET_WCHAR       )
-pick1( TYP_FCOMPLEX,    QDT_FCOMPLEX,    TY_POINTER,      0,           "float _Complex",         TARGET_FCOMPLEX    )
-pick1( TYP_DCOMPLEX,    QDT_DCOMPLEX,    TY_POINTER,      0,           "double _Complex",        TARGET_DCOMPLEX    )
-pick1( TYP_LDCOMPLEX,   QDT_LDCOMPLEX,   TY_POINTER,      0,           "long double _Complex",   TARGET_LDCOMPLEX   )
+/*      type             signedness    size                 alignment */
+pick1( TYP_BOOL,        CTS_UNSIGNED,  TARGET_BOOL,         TARGET_BOOL_ALIGN        )
+pick1( TYP_CHAR,        CTS_SIGNED,    TARGET_CHAR,         TARGET_CHAR_ALIGN        )
+pick1( TYP_UCHAR,       CTS_UNSIGNED,  TARGET_CHAR,         TARGET_CHAR_ALIGN        )
+pick1( TYP_SHORT,       CTS_SIGNED,    TARGET_SHORT,        TARGET_SHORT_ALIGN       )
+pick1( TYP_USHORT,      CTS_UNSIGNED,  TARGET_SHORT,        TARGET_SHORT_ALIGN       )
+pick1( TYP_INT,         CTS_SIGNED,    TARGET_INT,          TARGET_INT_ALIGN         )
+pick1( TYP_UINT,        CTS_UNSIGNED,  TARGET_INT,          TARGET_INT_ALIGN         )
+pick1( TYP_LONG,        CTS_SIGNED,    TARGET_LONG,         TARGET_LONG_ALIGN        )
+pick1( TYP_ULONG,       CTS_UNSIGNED,  TARGET_LONG,         TARGET_LONG_ALIGN        )
+pick1( TYP_LONG64,      CTS_SIGNED,    TARGET_LONG64,       TARGET_LONG64_ALIGN      )
+pick1( TYP_ULONG64,     CTS_UNSIGNED,  TARGET_LONG64,       TARGET_LONG64_ALIGN      )
+pick1( TYP_FLOAT,       CTS_NONE,      TARGET_FLOAT,        TARGET_FLOAT_ALIGN       )
+pick1( TYP_DOUBLE,      CTS_NONE,      TARGET_DOUBLE,       TARGET_DOUBLE_ALIGN      )
+pick1( TYP_LONG_DOUBLE, CTS_NONE,      TARGET_LDOUBLE,      TARGET_LDOUBLE_ALIGN     )
+pick1( TYP_FIMAGINARY,  CTS_NONE,      TARGET_FIMAGINARY,   TARGET_FIMAGINARY_ALIGN  )
+pick1( TYP_DIMAGINARY,  CTS_NONE,      TARGET_DIMAGINARY,   TARGET_DIMAGINARY_ALIGN  )
+pick1( TYP_LDIMAGINARY, CTS_NONE,      TARGET_LDIMAGINARY,  TARGET_LDIMAGINARY_ALIGN )
+pick1( TYP_POINTER,     CTS_NONE,      0,                   0                        )
+pick1( TYP_ARRAY,       CTS_NONE,      0,                   0                        )
+pick1( TYP_STRUCT,      CTS_NONE,      0,                   0                        )
+pick1( TYP_UNION,       CTS_NONE,      0,                   0                        )
+pick1( TYP_FUNCTION,    CTS_NONE,      0,                   0                        )
+pick1( TYP_FIELD,       CTS_NONE,      0,                   0                        )
+pick1( TYP_VOID,        CTS_NONE,      0,                   0                        )
+pick1( TYP_ENUM,        CTS_NONE,      0,                   0                        )
+pick1( TYP_TYPEDEF,     CTS_NONE,      0,                   0                        )
+pick1( TYP_UFIELD,      CTS_NONE,      0,                   0                        )
+pick1( TYP_DOT_DOT_DOT, CTS_NONE,      0,                   0                        )
+pick1( TYP_PLAIN_CHAR,  CTS_NONE,      TARGET_CHAR,         TARGET_CHAR_ALIGN        )
+pick1( TYP_WCHAR,       CTS_UNSIGNED,  TARGET_WCHAR,        TARGET_WCHAR_ALIGN       )
+pick1( TYP_FCOMPLEX,    CTS_NONE,      TARGET_FCOMPLEX,     TARGET_FCOMPLEX_ALIGN    )
+pick1( TYP_DCOMPLEX,    CTS_NONE,      TARGET_DCOMPLEX,     TARGET_DCOMPLEX_ALIGN    )
+pick1( TYP_LDCOMPLEX,   CTS_NONE,      TARGET_LDCOMPLEX,    TARGET_LDCOMPLEX_ALIGN   )

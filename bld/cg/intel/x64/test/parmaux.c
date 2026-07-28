@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../../../cc/x64/target.h"
+#include "../../../../cc/x64/h/target.h"
 #include "_cgstd.h"
 #include "coderep.h"
 #include "procdef.h"
