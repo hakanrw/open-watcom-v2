@@ -1,0 +1,6 @@
+tree_depth = 5
+
+target_cpu = ppc
+target_cls = risc
+
+!include $(cc_dir)/$(target_cls)/master.mif

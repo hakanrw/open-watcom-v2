@@ -1,0 +1,6 @@
+tree_depth = 5
+
+target_cpu = 386
+target_cls = intel
+
+!include $(cc_dir)/$(target_cls)/master.mif
