@@ -366,7 +366,7 @@ static void StoreIValue64( DATA_TYPE dtype, int64 value )
     dq.flags = Q_DATA;
     dq.u.long64 = value;
     CompFlags.non_zero_data = true;
-    GenDataQuad( &dq, TARGET_LONG64 );
+    GenDataQuad( &dq, CTypeSize( dtype ) );
 }
 
 static void AddrFold( TREEPTR tree, addrfold_info *info )
@@ -381,7 +381,7 @@ static void AddrFold( TREEPTR tree, addrfold_info *info )
     switch( tree->op.opr ) {
     case OPR_PUSHINT:
         info->state = IS_ADDR;
-        info->offset = tree->op.u2.long_value;
+        info->offset = OpOffsetS32( tree->op );
         if( info->offset != 0 )
             CompFlags.non_zero_data = true;
         break;
@@ -434,10 +434,10 @@ static void AddrFold( TREEPTR tree, addrfold_info *info )
     case OPR_INDEX:
         if( tree->right->op.opr == OPR_PUSHINT ) {
             AddrFold( tree->left, info );
-            offset = tree->right->op.u2.long_value;
+            offset = OpOffsetS32( tree->right->op );
         } else if( tree->left->op.opr == OPR_PUSHINT ) {
             AddrFold( tree->right, info );
-            offset = tree->left->op.u2.long_value;
+            offset = OpOffsetS32( tree->left->op );
         } else {
             info->is_error = true;
         }
@@ -454,16 +454,16 @@ static void AddrFold( TREEPTR tree, addrfold_info *info )
         if( tree->right->op.opr == OPR_PUSHINT ) {
             AddrFold( tree->left, info );
             if( tree->op.opr == OPR_ADD ) {
-                info->offset = info->offset + tree->right->op.u2.long_value;
+                info->offset = info->offset + OpOffsetS32( tree->right->op );
             } else {
-                info->offset = info->offset - tree->right->op.u2.long_value;
+                info->offset = info->offset - OpOffsetS32( tree->right->op );
             }
         } else if( tree->left->op.opr == OPR_PUSHINT ) {
             AddrFold( tree->right, info );
             if( tree->op.opr == OPR_ADD ) {
-                info->offset = tree->left->op.u2.long_value + info->offset;
+                info->offset = OpOffsetS32( tree->left->op ) + info->offset;
             } else {
-                info->offset = tree->left->op.u2.long_value - info->offset;
+                info->offset = OpOffsetS32( tree->left->op ) - info->offset;
             }
         } else {
             info->is_error = true;
@@ -482,7 +482,7 @@ static void AddrFold( TREEPTR tree, addrfold_info *info )
         if( info->state == IS_VALUE ) { // must be foldable
             info->is_error = true;
         }
-        info->offset += tree->right->op.u2.long_value;
+        info->offset += OpOffsetS32( tree->right->op );
         if( tree->op.flags & OPFLAG_RVALUE ) {
             info->state = IS_VALUE;
         }
@@ -498,7 +498,7 @@ static void AddrFold( TREEPTR tree, addrfold_info *info )
         break;
     case OPR_DOT:
         AddrFold( tree->left, info );
-        info->offset += tree->right->op.u2.long_value;
+        info->offset += OpOffsetS32( tree->right->op );
         CompFlags.non_zero_data = true;
         if( tree->op.flags & OPFLAG_RVALUE ) {
             info->state = IS_VALUE;
@@ -609,14 +609,14 @@ static void StoreInt64( TYPEPTR typ )
         tree = InitAsgn( typ, tree ); // as if we are assigning
         if( IsConstLeaf( tree ) ) {
             CastConstValue( tree, typ->decl_type );
-            dq.u.long64 = tree->op.u2.ulong64_value;
+            dq.u.long64 = IntValue64( tree->op );
         } else {
             CErr1( ERR_NOT_A_CONSTANT_EXPR );
         }
         FreeExprTree( tree );
         CompFlags.non_zero_data = true;
     }
-    GenDataQuad( &dq, TARGET_LONG64 );
+    GenDataQuad( &dq, CTypeSize( typ->decl_type ) );
 }
 
 static void LoadBitField( uint64 *val64 )
@@ -667,7 +667,7 @@ static void InitBitField( FIELDPTR field )
     typ = field->field_type;
     size = SizeOfArg( typ );
     dtype = typ->u.f.field_type;
-    is64bit = ( dtype == TYP_LONG64 || dtype == TYP_ULONG64 );
+    is64bit = ( CTypeSize( dtype ) > 4 );
     LoadBitField( &value64 );
     if( typ->u.f.field_type == TYP_BOOL ) {
         width = 1;
@@ -736,7 +736,7 @@ static void *DesignatedInit( TYPEPTR typ, TYPEPTR ctyp, void *field )
         tree = SingleExpr();
         if( IsConstLeaf( tree ) ) {
             CastConstValue( tree, typ->decl_type );
-            *(target_size *)field = tree->op.u2.ulong_value;
+            *(target_size *)field = IntValueU32( tree->op );
         } else {
             CErr1( ERR_NOT_A_CONSTANT_EXPR );
         }
@@ -1015,8 +1015,16 @@ void InitSymData( TYPEPTR typ, TYPEPTR ctyp, int level )
     case TYP_USHORT:
     case TYP_INT:
     case TYP_UINT:
+        StorePointer( typ, size );
+        break;
     case TYP_LONG:
     case TYP_ULONG:
+        if( size > 4 ) {
+            StoreInt64( typ );
+        } else {
+            StorePointer( typ, size );
+        }
+        break;
     case TYP_POINTER:
         StorePointer( typ, size );
         break;

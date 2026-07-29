@@ -789,16 +789,10 @@ bool CheckAssignRange( TYPEPTR typ1, TREEPTR opnd2 )
 
     if( opnd2->op.opr == OPR_PUSHINT ) {
         typ1 = SkipTypeFluff( typ1 );
-        if( typ1->decl_type == TYP_LONG64
-          || typ1->decl_type == TYP_ULONG64 ) {
+        if( TypeSize( typ1 ) >= 8 ) {
             return( false );
         }
-        if( opnd2->u.expr_type->decl_type == TYP_LONG64
-          || opnd2->u.expr_type->decl_type == TYP_ULONG64 ) {
-            val64 = opnd2->op.u2.ulong64_value;
-        } else {
-            Set64ValI32( val64, opnd2->op.u2.long_value );
-        }
+        val64 = LongValue64( opnd2 );
         switch( typ1->decl_type ) {
         case TYP_FIELD:
         case TYP_UFIELD:
