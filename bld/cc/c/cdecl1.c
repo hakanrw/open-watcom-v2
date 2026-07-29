@@ -469,11 +469,11 @@ static void AddParms( void )
 
             case TYP_USHORT:
                 if( CompFlags.strict_ANSI ) {
-#if TARGET_SHORT == TARGET_INT
-                    parm->sym.sym_type = GetType( TYP_UINT );
-#else
-                    parm->sym.sym_type = GetType( TYP_INT );
-#endif
+                    if( TARGET_SHORT == TARGET_INT ) {
+                        parm->sym.sym_type = GetType( TYP_UINT );
+                    } else {
+                        parm->sym.sym_type = GetType( TYP_INT );
+                    }
                 }
                 break;
 

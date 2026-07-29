@@ -1015,6 +1015,7 @@ void GenCOptions( char **cmdline )
      */
     AnalyseAnyTargetOptions( &data );
     CmdSysAnalyse( &data );
+    CTypeSetTargetABI();
     OPT_FINI( &data );
     MiscMacroDefs();
 }

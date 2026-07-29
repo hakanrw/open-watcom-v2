@@ -372,7 +372,7 @@ static void SetDftCallConv( OPT_STORAGE *data )
 #if _CPU == _X64
     /* The environment chooses the default; #pragma aux may select the other. */
     (void)data;
-    if( TargetSwitches & CGSW_X64_ENV_SYSV ) {
+    if( TargetABI == CG_ABI_X64_SYSV ) {
         DftCallConv = &SysVInfo;
     } else {
         DftCallConv = &Win64Info;
@@ -415,13 +415,16 @@ static void SetDftCallConv( OPT_STORAGE *data )
 }
 
 #if _CPU == _X64
-static void SetX64Environment( void )
+static void SetTargetABI( void )
 {
-    TargetSwitches &= ~CGSW_X64_ENV_MASK;
     if( TargetSystem == TS_NT ) {
-        TargetSwitches |= CGSW_X64_ENV_WIN64;
+        TargetABI = CG_ABI_X64_WIN64;
     } else {
-        TargetSwitches |= CGSW_X64_ENV_SYSV;
+        TargetABI = CG_ABI_X64_SYSV;
+    }
+    TargetInfo = &TargetABIs[TargetABI];
+    if( TargetInfo->abi != TargetABI ) {
+        DbgNever();
     }
 }
 #endif
@@ -1246,7 +1249,7 @@ void CmdSysAnalyse( OPT_STORAGE *data )
 
     target_name = setTargetSystem( data );
 #if _CPU == _X64
-    SetX64Environment();
+    SetTargetABI();
 #endif
     setIntelArchitecture( data );
     SetDebugInfoFormat( data );

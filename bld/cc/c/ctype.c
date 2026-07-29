@@ -53,23 +53,23 @@ static void CheckBitfieldType( TYPEPTR typ );
 /*
  * matches enum DataType in ctypes.h
  */
-static unsigned char  CTypeSizes[] = {
-    #define pick1(type,signedness,size,alignment) size,
-    #include "cdatatyp.h"
-    #undef  pick1
-};
-
-static unsigned char  CTypeAlignments[] = {
-    #define pick1(type,signedness,size,alignment) alignment,
-    #include "cdatatyp.h"
-    #undef  pick1
-};
+static unsigned char  CTypeSizes[DATA_TYPE_SIZE];
+static unsigned char  CTypeAlignments[DATA_TYPE_SIZE];
 
 static unsigned char  CTypeSigns[] = {
     #define pick1(type,signedness,size,alignment) signedness,
     #include "cdatatyp.h"
     #undef  pick1
 };
+
+void CTypeSetTargetABI( void )
+{
+    #define pick1(type,signedness,size,alignment) \
+        CTypeSizes[type] = size; \
+        CTypeAlignments[type] = alignment;
+    #include "cdatatyp.h"
+    #undef pick1
+}
 
 TYPEPTR CTypeHash[DATA_TYPE_SIZE];
 TYPEPTR PtrTypeHash[DATA_TYPE_SIZE];
@@ -118,6 +118,7 @@ void CTypeInit( void )
 {
     DATA_TYPE   base_type;
 
+    CTypeSetTargetABI();
     TypeHead = NULL;
     TagCount = 0;
     FieldCount = 0;

@@ -35,6 +35,7 @@
 #define _CG_SWITCH_INCLUDED
 
 #include "cgtargsw.h"
+#include "cgtargabi.h"
 
 typedef enum {
     CGSW_GEN_OBJ_ENDIAN_BIG           = 0x00000001,

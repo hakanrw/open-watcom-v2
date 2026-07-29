@@ -36,6 +36,10 @@
 #include "i64.h"
 #include "cmacadd.h"
 
+const target_abi_info TargetABIs[CG_ABI_COUNT] = {
+#include "targetabi.h"
+};
+
 
 void InitGlobalVars( void )
 {
@@ -141,6 +145,8 @@ void InitGlobalVars( void )
 
     GenSwitches             = 0;        /* target independant switches for code generator */
     TargetSwitches          = 0;        /* target specific code generator switches */
+    TargetABI               = CG_ABI_DEFAULT;
+    TargetInfo              = &TargetABIs[CG_ABI_DEFAULT];
 
     ProcRevision            = 0;        /* processor revision for c.g. */
     GenCodeGroup            = NULL;     /* pointer to code group name */

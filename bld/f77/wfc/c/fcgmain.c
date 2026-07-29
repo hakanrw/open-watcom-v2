@@ -343,7 +343,7 @@ static  void    CGStart( void )
         } else if( CGOpts & CGOPT_DI_DWARF ) {
             cg_gen_opts |= CGSW_GEN_DBG_DF;
         }
-        cg_info = BEInit( cg_gen_opts, cg_target_opts, space_time, cpu );
+        cg_info = BEInit( cg_gen_opts, cg_target_opts, CG_ABI_DEFAULT, space_time, cpu );
 
         if( cg_info.target != 0 || cg_info.revision != 0 ) {
             if( ( cg_info.target == II_TARG_STUB ) ||

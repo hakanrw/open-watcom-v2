@@ -47,7 +47,7 @@ typedef union hdl_type {
 } hdl_type;
 
 extern  cg_init_info    BEInit(cg_switches switches, cg_target_switches tg_switches,
-                               uint size,proc_revision proc) {
+                               cg_target_abi abi, uint size,proc_revision proc) {
     cg_init_info        cg_info;
 
     cg_info.revision = II_REVISION;

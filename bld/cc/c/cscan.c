@@ -531,6 +531,30 @@ static TOKEN ScanPPDot( void )
     }
 }
 
+static bool ConstantFitsType( DATA_TYPE type )
+{
+    unsigned    size;
+    bool        is_signed;
+    unsigned_32 max_value;
+
+    size = CTypeSize( type );
+    is_signed = ( CTypeSignedness( type ) == CTS_SIGNED );
+    if( size >= 8 ) {
+        if( !is_signed ) {
+            return( true );
+        }
+        return( U64High( Constant64 ) <= 0x7fffffffUL );
+    }
+    if( size == 4 ) {
+        max_value = is_signed ? 0x7fffffffUL : 0xffffffffUL;
+    } else if( size == 2 ) {
+        max_value = is_signed ? 0x7fffU : 0xffffU;
+    } else {
+        max_value = is_signed ? 0x7fU : 0xffU;
+    }
+    return( U64CmpU32( Constant64, max_value ) <= 0 );
+}
+
 static TOKEN doScanNum( void )
 /****************************/
 {
@@ -758,13 +782,13 @@ static TOKEN doScanNum( void )
     case SUFF_8:
     case SUFF_16:
         if( ssuffix ) {
-            if( U64CmpU32( Constant64, TARGET_INT_MAX ) <= 0 ) {
+            if( ConstantFitsType( TYP_INT ) ) {
                 ConstType = TYP_INT;
                 break;
             }
         }
         if( usuffix ) {
-            if( U64CmpU32( Constant64, TARGET_UINT_MAX ) <= 0 ) {
+            if( ConstantFitsType( TYP_UINT ) ) {
                 ConstType = TYP_UINT;
                 break;
             }
@@ -772,13 +796,13 @@ static TOKEN doScanNum( void )
         /* fall through */
     case SUFF_L:
         if( ssuffix ) {
-            if( U64CmpU32( Constant64, TARGET_LONG_MAX ) <= 0 ) {
+            if( ConstantFitsType( TYP_LONG ) ) {
                 ConstType = TYP_LONG;
                 break;
             }
         }
         if( usuffix ) {
-            if( U64CmpU32( Constant64, TARGET_ULONG_MAX ) <= 0 ) {
+            if( ConstantFitsType( TYP_ULONG ) ) {
                 ConstType = TYP_ULONG;
                 break;
             }

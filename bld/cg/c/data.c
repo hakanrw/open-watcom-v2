@@ -50,6 +50,7 @@ source_line_number      SrcLine;
 cg_switches             Model;
 cg_target_switches      TargetModel;
 cg_target_switches      SaveTargetModel;
+cg_target_abi           CGTargetABI;
 global_bit_set          MemoryBits;
 type_class_def          ClassPointer;
 bool                    BlockByBlock;

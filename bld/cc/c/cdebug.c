@@ -61,15 +61,20 @@ static void InitDBType( void )
     B_UInt_1 = DBScalar( "unsigned char", TY_UINT_1 );
     B_Short  = DBScalar( "short", TY_INT_2 );
     B_UShort = DBScalar( "unsigned short", TY_UINT_2 );
-#if TARGET_INT == 4
-    B_Int    = DBScalar( "int", TY_INT_4 );
-    B_UInt   = DBScalar( "unsigned int", TY_UINT_4 );
-#else
-    B_Int    = DBScalar( "int", TY_INT_2 );
-    B_UInt   = DBScalar( "unsigned int", TY_UINT_2 );
-#endif
-    B_Int32  = DBScalar( "long", TY_INT_4 );
-    B_UInt32 = DBScalar( "unsigned long", TY_UINT_4 );
+    if( TARGET_INT == 4 ) {
+        B_Int  = DBScalar( "int", TY_INT_4 );
+        B_UInt = DBScalar( "unsigned int", TY_UINT_4 );
+    } else {
+        B_Int  = DBScalar( "int", TY_INT_2 );
+        B_UInt = DBScalar( "unsigned int", TY_UINT_2 );
+    }
+    if( TARGET_LONG == 8 ) {
+        B_Int32  = DBScalar( "long", TY_INT_8 );
+        B_UInt32 = DBScalar( "unsigned long", TY_UINT_8 );
+    } else {
+        B_Int32  = DBScalar( "long", TY_INT_4 );
+        B_UInt32 = DBScalar( "unsigned long", TY_UINT_4 );
+    }
     B_Int64  = DBScalar( "__int64", TY_INT_8 );
     B_UInt64 = DBScalar( "unsigned __int64", TY_UINT_8 );
     B_Bool   = DBScalar( "_Bool", TY_UINT_1 );
