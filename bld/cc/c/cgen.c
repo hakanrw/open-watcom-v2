@@ -807,14 +807,23 @@ static cg_name PushConstant( OPNODE *node )
     case TYP_UINT:
     case TYP_LONG:
     case TYP_ULONG:
-        name = CGInteger( node->u2.ulong_value, dtype );
+        if( CTypeSize( node->u1.const_type ) > 4 ) {
+            name = CGInt64( IntValue64( *node ), dtype );
+        } else {
+            name = CGInteger( IntValueU32( *node ), dtype );
+        }
         break;
     case TYP_POINTER:
-        name = CGInteger( node->u2.ulong_value, DataPointerType( node ) );
+        dtype = DataPointerType( node );
+        if( CTypeSize( TYP_POINTER ) > 4 ) {
+            name = CGInt64( IntValue64( *node ), dtype );
+        } else {
+            name = CGInteger( IntValueU32( *node ), dtype );
+        }
         break;
     case TYP_LONG64:
     case TYP_ULONG64:
-        name = CGInt64( node->u2.ulong64_value, dtype );
+        name = CGInt64( IntValue64( *node ), dtype );
         break;
     case TYP_FLOAT:
     case TYP_DOUBLE:

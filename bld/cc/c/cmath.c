@@ -561,35 +561,20 @@ static int NumSize( DATA_TYPE op_type )
         size = 1;
         break;
     case TYP_CHAR:
-        size = SIGN_BIT;
-        /* fall through */
     case TYP_UCHAR:
-        size |= 8;
-        break;
     case TYP_SHORT:
-        size = SIGN_BIT;
-        /* fall through */
     case TYP_USHORT:
-        size |= 16;
-        break;
-    case TYP_LONG:
-        size = SIGN_BIT;
-        /* fall through */
-    case TYP_ULONG:
-    case TYP_POINTER:
-        size |= 32;
-        break;
-    case TYP_LONG64:
-        size = SIGN_BIT;
-        /* fall through */
-    case TYP_ULONG64:
-        size |= 64;
-        break;
     case TYP_INT:
-        size = SIGN_BIT;
-        /* fall through */
     case TYP_UINT:
-        size |= TARGET_INT * CHAR_BIT;
+    case TYP_LONG:
+    case TYP_ULONG:
+    case TYP_LONG64:
+    case TYP_ULONG64:
+    case TYP_POINTER:
+        size = CTypeSize( op_type ) * CHAR_BIT;
+        if( CTypeSignedness( op_type ) == CTS_SIGNED ) {
+            size |= SIGN_BIT;
+        }
         break;
     }
     return( size );
@@ -630,8 +615,8 @@ static cmp_result IsMeaninglessCompare( signed_64 val, TYPEPTR typ_op1, TYPEPTR 
     if( result_size == 0 ) {
         return( CMP_VOID );
     }
-    if( typ_op2->decl_type != TYP_LONG64 && typ_op2->decl_type != TYP_ULONG64 ) {
-        if( typ_op2->decl_type == TYP_ULONG || typ_op2->decl_type == TYP_UINT ) {
+    if( CTypeSize( typ_op2->decl_type ) <= 4 ) {
+        if( CTypeSignedness( typ_op2->decl_type ) == CTS_UNSIGNED ) {
             Set64ValU32( val, U32FetchTrunc( val ) );
         } else {
             Set64ValI32( val, I32FetchTrunc( val ) );
@@ -873,9 +858,9 @@ TREEPTR RelOp( TREEPTR op1, TOKEN opr, TREEPTR op2 )
     if( IS_PPCTL_NORMAL() ) {
         cmp_cc = CMP_VOID;
         if( op2->op.opr == OPR_PUSHINT ) {
-            cmp_cc = IsMeaninglessCompare( op2->op.u2.long64_value, typ1, typ2, opr );
+            cmp_cc = IsMeaninglessCompare( IntValue64( op2->op ), typ1, typ2, opr );
         } else if( op1->op.opr == OPR_PUSHINT ) {
-            cmp_cc = IsMeaninglessCompare( op1->op.u2.long64_value, typ2, typ1, ReverseRelOp( opr ) );
+            cmp_cc = IsMeaninglessCompare( IntValue64( op1->op ), typ2, typ1, ReverseRelOp( opr ) );
         }
         if( cmp_cc != CMP_VOID ) {
             if( cmp_cc == CMP_COMPLEX ) {
@@ -1006,28 +991,17 @@ static TREEPTR MulByConst( TREEPTR opnd, target_ssize amount )
 {
     TREEPTR     tree;
 
-#if 0
     if( opnd->op.opr == OPR_PUSHINT ) {
-        switch( opnd->op.u1.const_type ) {
-        case TYP_LONG64:
-        case TYP_ULONG64:
-          {
+        if( CTypeSize( opnd->op.u1.const_type ) > 4 ) {
             signed_64   val64;
 
             Set64ValI32( val64, amount );
-            U64MulEq( &opnd->op.u2.long64_value, &val64 );
-          } break;
-        default:
-            opnd->op.u2.long_value *= amount;
+            U64MulEq( &IntValue64( opnd->op ), &val64 );
+        } else {
+            IntValueU32( opnd->op ) *= amount;
         }
         return( opnd );
     }
-#else
-    if( opnd->op.opr == OPR_PUSHINT ) {
-        opnd->op.u2.long_value *= amount;
-        return( opnd );
-    }
-#endif
 
     switch( TypeOf( opnd )->decl_type ) {
 #if 0
@@ -1138,7 +1112,7 @@ static TREEPTR ArrayPlusConst( TREEPTR op1, TREEPTR op2 )
             SKIP_TYPEDEFS( typ );
             if( typ->decl_type == TYP_ARRAY ) {
 
-                op2->op.u2.long_value *= SizeOfArg( typ->object );
+                IntValueS32( op2->op ) *= SizeOfArg( typ->object );
                 typ = PtrofSym( op1->op.u2.sym_handle, typ->object );
                 result = ExprNode( op1, OPR_ADD, op2 );
                 result->u.expr_type = typ;
@@ -1161,8 +1135,8 @@ static TREEPTR ArrayMinusConst( TREEPTR op1, TREEPTR op2 )
             typ = op1->u.expr_type;
             SKIP_TYPEDEFS( typ );
             if( typ->decl_type == TYP_ARRAY ) {
-                op2->op.u2.long_value =
-                        (- op2->op.u2.long_value) * SizeOfArg( typ->object );
+                IntValueS32( op2->op ) =
+                        (- IntValueS32( op2->op )) * SizeOfArg( typ->object );
                 typ = PtrofSym( op1->op.u2.sym_handle, typ->object );
                 result = ExprNode( op1, OPR_ADD, op2 );
                 result->u.expr_type = typ;
@@ -1983,7 +1957,6 @@ TREEPTR FixupAss( TREEPTR opnd, TYPEPTR newtyp )
 
 TREEPTR UMinus( TREEPTR opnd )
 {
-//    FLOATVAL        *flt;
     DATA_TYPE       t;
 
     opnd = RValue( opnd );
@@ -2000,60 +1973,6 @@ TREEPTR UMinus( TREEPTR opnd )
             }
         }
     }
-#if 0
-    switch( opnd->op.opr ) {
-    case OPR_ERROR:
-        break;
-    case OPR_PUSHINT:
-        switch( opnd->op.const_type ) {
-        case TYP_CHAR:
-        case TYP_UCHAR:
-            opnd->op.u2.long_value =  -(char)opnd->op.u2.long_value;
-            break;
-        case TYP_SHORT:
-        case TYP_USHORT:
-            opnd->op.u2.long_value = -(short)opnd->op.u2.long_value;
-            break;
-        case TYP_INT:
-            opnd->op.u2.long_value = -(target_int)opnd->op.u2.long_value;
-            break;
-        case TYP_UINT:
-            opnd->op.u2.long_value =
-                        (target_uint)( - (target_uint)opnd->op.u2.long_value);
-            break;
-        case TYP_LONG:
-        case TYP_ULONG:
-            opnd->op.u2.long_value = - opnd->op.u2.long_value;
-            break;
-        }
-        break;
-    case OPR_PUSHFLOAT:
-        flt = opnd->op.float_value;
-        if( flt->len != 0 ) {           // if still in string form
-            flt->string[0] ^= '+' ^ '-';// - change '+' to '-' and vice versa
-        } else {                        // else
-#ifdef _LONG_DOUBLE_
-            flt->ld.exponent ^= 0x8000;     // - flip binary sign bit
-#else
-            flt->ld.u.word[1] ^= 0x80000000;  // - flip sign
-#endif
-        }
-        break;
-    default:
-        t = DataTypeOf( TypeOf( opnd ) );
-        if( t == TYP_VOID )
-            break;
-        if( t >= TYP_POINTER ) {
-            CErr1( ERR_EXPR_MUST_BE_ARITHMETIC );
-            opnd = ErrorNode( opnd );
-        } else {
-            opnd = ExprNode( NULL, OPR_NEG, opnd );
-            opnd->u.expr_type = GetType( ResolveResultType( SubResult[t][t] ) );
-            opnd->op.u2.result_type = opnd->u.expr_type;
-        }
-        break;
-    }
-#endif
     return( opnd );
 }
 
@@ -2079,49 +1998,6 @@ TREEPTR UComplement( TREEPTR opnd )
             }
         }
     }
-#if 0
-    switch( opnd->op.opr ) {
-    case OPR_ERROR:
-        break;
-    case OPR_PUSHINT:
-        switch( opnd->op.const_type ) {
-        case TYP_CHAR:
-        case TYP_UCHAR:
-            opnd->op.u2.long_value = (char)~opnd->op.u2.long_value;
-            break;
-        case TYP_SHORT:
-        case TYP_USHORT:
-            opnd->op.u2.long_value = (short)~opnd->op.u2.long_value;
-            break;
-        case TYP_INT:
-            opnd->op.u2.long_value = (target_int)~opnd->op.u2.long_value;
-            break;
-        case TYP_UINT:
-            opnd->op.u2.ulong_value = (target_uint)~opnd->op.u2.ulong_value;
-            break;
-        case TYP_LONG:
-        case TYP_ULONG:
-            opnd->op.u2.ulong_value = ~opnd->op.u2.ulong_value;
-            break;
-        }
-        break;
-    default:
-        typ = opnd->u.expr_type;
-        SKIP_TYPEDEFS( typ );
-        t = DataTypeOf( typ );
-        if( t == TYP_VOID )
-            break;
-        if( t >= TYP_FLOAT ) {
-            CErr1( ERR_EXPR_MUST_BE_INTEGRAL );
-            opnd = ErrorNode( opnd );
-        } else {
-            opnd = ExprNode( NULL, OPR_COM, opnd );
-            opnd->u.expr_type = GetType( ResolveResultType( SubResult[t][t] ) );
-            opnd->op.u2.result_type = opnd->u.expr_type;
-        }
-        break;
-    }
-#endif
     return( opnd );
 }
 

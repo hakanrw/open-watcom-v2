@@ -105,7 +105,7 @@ static void DumpOpnd( TREEPTR opnd )
         printf( "error" );
         break;
     case OPR_PUSHINT:
-        printf( "%d", opnd->op.u2.long_value );
+        printf( "%d", IntValueS32( opnd->op ) );
         break;
     case OPR_PUSHFLOAT:
 #ifdef _LONG_DOUBLE_

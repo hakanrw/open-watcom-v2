@@ -248,29 +248,37 @@ static TREEPTR ConstLeaf( void )
         } else {
             leaf->op.u1.const_type = TYP_USHORT;
         }
-        leaf->op.u2.long_value = U32FetchTrunc( Constant64 );
+        IntValueS32( leaf->op ) = U32FetchTrunc( Constant64 );
         break;
     case TYP_CHAR:
     case TYP_UCHAR:
         leaf->op.u1.const_type = TYP_INT;
         /* fall through */
     case TYP_INT:
-        leaf->op.u2.long_value = I32FetchTrunc( Constant64 );
+        IntValueS32( leaf->op ) = I32FetchTrunc( Constant64 );
         break;
     case TYP_UINT:
-        leaf->op.u2.ulong_value = U32FetchTrunc( Constant64 );
+        IntValueU32( leaf->op ) = U32FetchTrunc( Constant64 );
         break;
     case TYP_LONG:
-        leaf->op.u2.long_value = I32FetchTrunc( Constant64 );
+        if( CTypeSize( TYP_LONG ) > 4 ) {
+            IntValue64( leaf->op ) = Constant64;
+        } else {
+            IntValueS32( leaf->op ) = I32FetchTrunc( Constant64 );
+        }
         break;
     case TYP_ULONG:
-        leaf->op.u2.ulong_value = U32FetchTrunc( Constant64 );
+        if( CTypeSize( TYP_ULONG ) > 4 ) {
+            IntValue64( leaf->op ) = Constant64;
+        } else {
+            IntValueU32( leaf->op ) = U32FetchTrunc( Constant64 );
+        }
         break;
     case TYP_LONG64:
-        leaf->op.u2.long64_value = Constant64;
+        IntValue64( leaf->op ) = Constant64;
         break;
     case TYP_ULONG64:
-        leaf->op.u2.ulong64_value = Constant64;
+        IntValue64( leaf->op ) = Constant64;
         break;
     case TYP_FLOAT:
     case TYP_DOUBLE:
@@ -302,7 +310,7 @@ TREEPTR IntLeaf( target_int value )
 
     leaf = LeafNode( OPR_PUSHINT );
     leaf->op.u1.const_type = TYP_INT;
-    leaf->op.u2.long_value = value;
+    IntValueS32( leaf->op ) = value;
     leaf->u.expr_type = GetType( TYP_INT );
     return( leaf );
 }
@@ -313,7 +321,7 @@ TREEPTR UIntLeaf( target_uint value )
 
     leaf = LeafNode( OPR_PUSHINT );
     leaf->op.u1.const_type = TYP_UINT;
-    leaf->op.u2.ulong_value = value;
+    IntValueU32( leaf->op ) = value;
     leaf->u.expr_type = GetType( TYP_UINT );
     return( leaf );
 }
@@ -324,7 +332,11 @@ TREEPTR LongLeaf( target_long value )
 
     leaf = LeafNode( OPR_PUSHINT );
     leaf->op.u1.const_type = TYP_LONG;
-    leaf->op.u2.long_value = value;
+    if( CTypeSize( TYP_LONG ) > 4 ) {
+        Set64ValI32( IntValue64( leaf->op ), value );
+    } else {
+        IntValueS32( leaf->op ) = value;
+    }
     leaf->u.expr_type = GetType( TYP_LONG );
     return( leaf );
 }
@@ -336,27 +348,27 @@ static TREEPTR EnumLeaf( ENUMPTR ep )
 
     leaf = LeafNode( OPR_PUSHINT );
     decl_type = ep->parent->sym_type->object->decl_type;
-    switch( decl_type ) {
-    case TYP_CHAR:
-    case TYP_SHORT:
-        decl_type = TYP_INT;
-        /* fall through */
-    case TYP_INT:
-    case TYP_LONG:
-        leaf->op.u2.long_value = (signed_32)U64Low( ep->value );
-        break;
-    case TYP_UCHAR:
-    case TYP_USHORT:
-        decl_type = TYP_INT;
-        /* fall through */
-    case TYP_UINT:
-    case TYP_ULONG:
-        leaf->op.u2.long_value = U64Low( ep->value );
-        break;
-    case TYP_LONG64:
-    case TYP_ULONG64:
-        leaf->op.u2.long64_value = ep->value;
-        break;
+    if( CTypeSize( decl_type ) > 4 ) {
+        IntValue64( leaf->op ) = ep->value;
+    } else {
+        switch( decl_type ) {
+        case TYP_CHAR:
+        case TYP_SHORT:
+            decl_type = TYP_INT;
+            /* fall through */
+        case TYP_INT:
+        case TYP_LONG:
+            IntValueS32( leaf->op ) = (signed_32)U64Low( ep->value );
+            break;
+        case TYP_UCHAR:
+        case TYP_USHORT:
+            decl_type = TYP_INT;
+            /* fall through */
+        case TYP_UINT:
+        case TYP_ULONG:
+            IntValueU32( leaf->op ) = U64Low( ep->value );
+            break;
+        }
     }
     leaf->op.u1.const_type = decl_type;
     leaf->u.expr_type = GetType( decl_type );
@@ -764,7 +776,7 @@ static TREEPTR AddrOp( TREEPTR tree )
          */
         if( tree->left->op.opr == OPR_PUSHINT ) {
             leaf = tree->left;
-            leaf->op.u2.ulong_value += tree->right->op.u2.ulong_value;
+            OpOffsetU32( leaf->op ) += OpOffsetU32( tree->right->op );
             tree->left = NULL;
             FreeExprTree( tree );
             leaf->u.expr_type = PtrNode( typ, FLAG_NONE, SEG_DATA );
@@ -940,7 +952,7 @@ TREEPTR BasedPtrNode( TYPEPTR ptrtyp, TREEPTR tree )
              */
             based_sym = LeafNode( OPR_PUSHINT );
             based_sym->op.u1.const_type = TYP_INT;
-            based_sym->op.u2.long_value = segid;
+            OpOffsetS32( based_sym->op ) = segid;
             based_sym->u.expr_type = GetType( TYP_USHORT );
         }
         tree = MakeFarOp( based_sym, tree );
@@ -1093,7 +1105,7 @@ static TREEPTR DotOp( TREEPTR tree )
     }
     if( tree->op.opr == OPR_DOT
       || tree->op.opr == OPR_ARROW ) {
-        tree->right->op.u2.ulong_value += offset;
+        OpOffsetU32( tree->right->op ) += offset;
     } else {
         if( tree->op.opr == OPR_PUSHADDR ) {
             SymGet( &sym, tree->op.u2.sym_handle );
@@ -1186,18 +1198,12 @@ bool ConstExprAndType( const_val *val )
     switch( tree->op.opr ) {
     case OPR_PUSHINT:
         val->type = tree->op.u1.const_type;
-        switch( tree->op.u1.const_type ) {
-        case TYP_LONG64:
-        case TYP_ULONG64:
-            val->value = tree->op.u2.long64_value;
-            break;
-        case TYP_ULONG:
-        case TYP_UINT:
-            Set64ValU32( val->value, tree->op.u2.long_value );
-            break;
-        default:
-            Set64ValI32( val->value, tree->op.u2.long_value );
-            break;
+        if( CTypeSize( tree->op.u1.const_type ) > 4 ) {
+            val->value = IntValue64( tree->op );
+        } else if( CTypeSignedness( tree->op.u1.const_type ) == CTS_UNSIGNED ) {
+            Set64ValU32( val->value, IntValueU32( tree->op ) );
+        } else {
+            Set64ValI32( val->value, IntValueS32( tree->op ) );
         }
         ret = true;
         break;
@@ -1861,10 +1867,10 @@ static TREEPTR GenIndex( TREEPTR tree, TREEPTR index_expr )
      */
     if( index_expr->op.opr == OPR_PUSHINT
       && tree->u.expr_type->decl_type == TYP_ARRAY ) {
-        index_expr->op.u2.long_value *= SizeOfArg( typ );
+        IntValueS32( index_expr->op ) *= SizeOfArg( typ );
         tree = ExprNode( tree, OPR_DOT, index_expr );
 #if _CPU == 8086
-        if( index_expr->op.u2.long_value > TARGET_INT_MAX ) {
+        if( IntValueS32( index_expr->op ) > TARGET_INT_MAX ) {
             index_expr->op.u1.const_type = TYP_LONG;
             index_expr->u.expr_type = GetType( TYP_LONG );
         }
@@ -2574,7 +2580,7 @@ TREEPTR BoolExpr( TREEPTR tree )
             CErr1( ERR_EXPR_MUST_BE_SCALAR );
         } else if( tree->op.opr == OPR_PUSHINT ) {
             if( !CheckZeroConstant( tree ) ) {
-                tree->op.u2.ulong_value = 1;
+                IntValueU32( tree->op ) = 1;
             }
             tree->op.u1.const_type = TYP_INT;
             tree->u.expr_type = GetType( TYP_INT );
@@ -2601,12 +2607,13 @@ static TREEPTR NotOp( TREEPTR tree )
         case TYP_UINT:
         case TYP_LONG:
         case TYP_ULONG:
-            tree->op.u2.long_value = ( tree->op.u2.long_value == 0 );
-            tree->op.u1.const_type = TYP_INT;
-            break;
         case TYP_LONG64:
         case TYP_ULONG64:
-            tree->op.u2.long_value = U64isZero( tree->op.u2.long64_value );
+            if( CTypeSize( tree->op.u1.const_type ) > 4 ) {
+                IntValueS32( tree->op ) = U64isZero( IntValue64( tree->op ) );
+            } else {
+                IntValueS32( tree->op ) = ( IntValueS32( tree->op ) == 0 );
+            }
             tree->op.u1.const_type = TYP_INT;
             break;
         case TYP_FLOAT:
@@ -2614,9 +2621,9 @@ static TREEPTR NotOp( TREEPTR tree )
         case TYP_LONG_DOUBLE:
             flt = tree->op.u2.float_value;
             if( atof( flt->string ) == 0.0 ) {
-                tree->op.u2.long_value = 1;
+                IntValueS32( tree->op ) = 1;
             } else {
-                tree->op.u2.long_value = 0;
+                IntValueS32( tree->op ) = 0;
             }
             CMemFree( flt );
             tree->op.opr = OPR_PUSHINT;

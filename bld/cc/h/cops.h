@@ -133,6 +133,12 @@ typedef short           tryindex_t;
 
 struct expr_node;
 
+typedef union ast_int_value {
+    uint64          value;
+    signed_32       signed_32_value[2];
+    unsigned_32     unsigned_32_value[2];
+} ast_int_value;
+
 typedef struct  opnode {
     opr_code            opr;            // see opr_code above
     op_flags            flags;
@@ -146,10 +152,7 @@ typedef struct  opnode {
         SYM_HANDLE      sym_handle;     // OPR_PUSHSYM, OPR_PUSHADDR, ...
                                         // OPR_CALL_INDIRECT
         source_loc      src_loc;        // OPR_STMT
-        int             long_value;     // OPR_PUSHINT
-        unsigned int    ulong_value;    // OPR_PUSHINT
-        int64           long64_value;   // OPR_PUSHINT
-        uint64          ulong64_value;  // OPR_PUSHINT
+        ast_int_value   integer;        // OPR_PUSHINT
         FLOATVAL        *float_value;   // OPR_PUSHFLOAT
         STR_HANDLE      string_handle;  // OPR_PUSHSTRING
         TYPEPTR         result_type;    // for operators(+-*/%|&^) etc
@@ -176,6 +179,13 @@ typedef struct  opnode {
         } sp;
     } u2;
 } OPNODE;
+
+/* Endian-independent views of an AST integer constant. */
+#define IntValue64(op)  ((op).u2.integer.value)
+#define IntValueS32(op) ((op).u2.integer.signed_32_value[I64LO32])
+#define IntValueU32(op) ((op).u2.integer.unsigned_32_value[I64LO32])
+#define OpOffsetS32(op) ((op).u2.integer.signed_32_value[I64LO32])
+#define OpOffsetU32(op) ((op).u2.integer.unsigned_32_value[I64LO32])
 
 typedef struct expr_node {
     struct expr_node    *left;
