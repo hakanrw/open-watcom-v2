@@ -199,16 +199,18 @@ typedef enum BASED_KIND {
 } BASED_KIND;
 
 /* matches CompTable[] in ccheck.c */
-/* matches CTypenames[] table in cdump.c */
-/* matches CGDataType[] table in cgen.c */
 /* matches AddResult[],SubResult[],IntResult[],ShiftResult[],BinResult[],
            CnvTable[] tables in cmath.c */
-/* matches AsmDataType[] table in cpragx86.c */
-/* matches CTypeSizes[] table in ctype.c */
+
+typedef enum {
+    CTS_NONE,
+    CTS_SIGNED,
+    CTS_UNSIGNED
+} c_type_sign;
 
 typedef enum DATA_TYPE {
     TYP_UNDEFINED = -1,
-    #define pick1(type,dtype,cgtype,asmtype,name,size)  type,
+    #define pick1(type,signedness,size,alignment)  type,
     #include "cdatatyp.h"
     #undef pick1
     TYP_ERROR,          /* make sure this is always last */
@@ -437,10 +439,7 @@ enum quad_flags {           /* code data */
 };
 
 enum quad_type {
-    #define pick1(type,dtype,cgtype,asmtype,name,size)  dtype,
-    #include "cdatatyp.h"
-    #undef pick1
-    QDT_STATIC,
+    QDT_STATIC = TYP_ERROR,
     QDT_CONSTANT,
     QDT_STRING,
     QDT_CONST,

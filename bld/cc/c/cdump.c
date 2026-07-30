@@ -47,11 +47,15 @@ static void DoDumpType( TYPEPTR realtype, SYMPTR sym, STRCHUNK *pch );
 /*
  * matches table of type in ctypes.h
  */
-static const char   *CTypeNames[] = {
-    #define pick1(type,dtype,cgtype,x86asmtype,name,size) name,
-    #include "cdatatyp.h"
+static const char *CTypeName( DATA_TYPE dtype )
+{
+    switch( dtype ) {
+    #define pick1(type,name) case type: return( name );
+    #include "ctypname.h"
     #undef  pick1
-};
+    }
+    return( "<invalid type>" );
+}
 
 static bool     do_message_output;  /* Optimize output for human */
 
@@ -143,7 +147,7 @@ void DumpTypeCounts( void )
     int     i;
 
     for( i = 0; i < DATA_TYPE_BOOL_TO_VOID; ++i ) {
-        printf( "%3u %s\n", CTypeCounts[i], CTypeNames[i] );
+        printf( "%3u %s\n", CTypeCounts[i], CTypeName( i ) );
     }
     printf( "%u pointer nodes\n", CTypeCounts[TYPE_POINTER] );
 }
@@ -343,11 +347,11 @@ static void DumpBaseType( TYPEPTR typ, STRCHUNK *pch )
         if( typ->type_flags & TF2_TYP_PLAIN_CHAR ) {
             ChunkSaveStrWord( pch, "char" );
         } else if( typ->decl_type == TYP_FIELD || typ->decl_type == TYP_UFIELD ) {
-            ChunkSaveStr( pch, CTypeNames[typ->u.f.field_type] );
+            ChunkSaveStr( pch, CTypeName( typ->u.f.field_type ) );
             sprintf( tempbuf, ":%u", (unsigned)typ->u.f.field_width );
             ChunkSaveStr( pch, tempbuf );
         } else {
-            ChunkSaveStrWord( pch, CTypeNames[typ->decl_type] );
+            ChunkSaveStrWord( pch, CTypeName( typ->decl_type ) );
         }
         if( typ->decl_type == TYP_STRUCT || typ->decl_type == TYP_UNION
           || typ->decl_type == TYP_ENUM ) {
@@ -556,7 +560,7 @@ static void DumpParmTags( TYPEPTR *parm, FILE *fp )
             typ = TrueType( typ );
             if( typ->decl_type == TYP_STRUCT || typ->decl_type == TYP_UNION ) {
                 ChunkInit(&chunk);
-                ChunkSaveStrWord( &chunk, CTypeNames[typ->decl_type] );
+                ChunkSaveStrWord( &chunk, CTypeName( typ->decl_type ) );
                 DumpTagName( typ->u.tag->name, &chunk );
                 result = ChunkToStr( &chunk );
                 fprintf( fp, "%s;\n", result );

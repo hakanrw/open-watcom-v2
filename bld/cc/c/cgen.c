@@ -91,14 +91,63 @@ struct func_save {
     LABEL_INDEX     labelindex;
 };
 
-/*
- * matches table of type in ctypes.h
- */
-static  char    CGDataType[] = {
-    #define pick1(type,dtype,cgtype,x86asmtype,name,size) cgtype,
-    #include "cdatatyp.h"
-    #undef  pick1
-};
+static cg_type CGenIntegerType( DATA_TYPE dtype )
+{
+    bool        is_signed;
+
+    is_signed = (CTypeSignedness( dtype ) == CTS_SIGNED);
+    switch( CTypeSize( dtype ) ) {
+    case 1:
+        return( is_signed ? TY_INT_1 : TY_UINT_1 );
+    case 2:
+        return( is_signed ? TY_INT_2 : TY_UINT_2 );
+    case 4:
+        return( is_signed ? TY_INT_4 : TY_UINT_4 );
+    case 8:
+        return( is_signed ? TY_INT_8 : TY_UINT_8 );
+    }
+    return( TY_INTEGER );
+}
+
+cg_type CGenTypeId( DATA_TYPE dtype )
+{
+    switch( dtype ) {
+    case TYP_BOOL:
+    case TYP_CHAR:
+    case TYP_UCHAR:
+    case TYP_SHORT:
+    case TYP_USHORT:
+    case TYP_INT:
+    case TYP_UINT:
+    case TYP_LONG:
+    case TYP_ULONG:
+    case TYP_LONG64:
+    case TYP_ULONG64:
+    case TYP_WCHAR:
+        return( CGenIntegerType( dtype ) );
+    case TYP_FLOAT:
+    case TYP_FIMAGINARY:
+        return( TY_SINGLE );
+    case TYP_DOUBLE:
+    case TYP_DIMAGINARY:
+        return( TY_DOUBLE );
+    case TYP_LONG_DOUBLE:
+    case TYP_LDIMAGINARY:
+        return( CTypeSize( dtype ) == 8 ? TY_DOUBLE : TY_LONG_DOUBLE );
+    case TYP_POINTER:
+    case TYP_ARRAY:
+    case TYP_STRUCT:
+    case TYP_UNION:
+    case TYP_FCOMPLEX:
+    case TYP_DCOMPLEX:
+    case TYP_LDCOMPLEX:
+        return( TY_POINTER );
+    case TYP_FUNCTION:
+        return( TY_DEFAULT );
+    default:
+        return( TY_INTEGER );
+    }
+}
 
 static  cg_op   CGOperator[] = {
     #define pick1(enum,dump,cgenum) cgenum,
@@ -748,7 +797,7 @@ static cg_name PushConstant( OPNODE *node )
     FLOATVAL    *flt;
     char        *flt_string;
 
-    dtype = CGDataType[node->u1.const_type];
+    dtype = CGenTypeId( node->u1.const_type );
     switch( node->u1.const_type ) {
     case TYP_CHAR:
     case TYP_UCHAR:
@@ -2013,7 +2062,7 @@ cg_type CGenType( TYPEPTR typ )
         break;
     case TYP_FIELD:
     case TYP_UFIELD:
-        dtype = CGDataType[typ->u.f.field_type];
+        dtype = CGenTypeId( typ->u.f.field_type );
         break;
     case TYP_FUNCTION:
         dtype = CodePtrType( FLAG_NONE );
@@ -2026,7 +2075,7 @@ cg_type CGenType( TYPEPTR typ )
         typ = typ->object;
         /* fall through */
     default:
-        dtype = CGDataType[typ->decl_type];
+        dtype = CGenTypeId( typ->decl_type );
     }
     return( dtype );
 }

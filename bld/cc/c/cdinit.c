@@ -1137,7 +1137,7 @@ static void InitWCharArray( TYPEPTR typ )
     target_size         size;
     DATA_QUAD           dq;
 
-    dq.type = QDT_SHORT;
+    dq.type = (enum quad_type)TYP_WCHAR;
     dq.flags = Q_DATA;
     str_lit = GetLiteral();
     if( !CompFlags.wide_char_string )

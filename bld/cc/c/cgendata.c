@@ -134,51 +134,34 @@ static void EmitDQuad( DATA_QUAD *dq )
         DGLabel( FEBack( (CGSYM_HANDLE)dq->u.var.sym_handle ) );
         size = 0;
         break;
-    case QDT_CHAR:
-    case QDT_UCHAR:
-    case QDT_BOOL:
-        DGInteger( dq->u_long_value1, TY_UINT_1 );
-        size += sizeof( char );
-        if( dq->flags & Q_2_INTS_IN_ONE ) {
-            DGInteger( dq->u_long_value2, TY_UINT_1 );
-            size += sizeof( char );
+    case TYP_BOOL:
+    case TYP_CHAR:
+    case TYP_UCHAR:
+    case TYP_SHORT:
+    case TYP_USHORT:
+    case TYP_INT:
+    case TYP_UINT:
+    case TYP_LONG:
+    case TYP_ULONG:
+    case TYP_LONG64:
+    case TYP_ULONG64:
+    case TYP_WCHAR:
+        data_type = CGenTypeId( (DATA_TYPE)dq->type );
+        amount = CTypeSize( (DATA_TYPE)dq->type );
+        if( amount == 8 ) {
+            DGInteger64( dq->u.long64, data_type );
+        } else {
+            DGInteger( dq->u_long_value1, data_type );
+            if( dq->flags & Q_2_INTS_IN_ONE ) {
+                DGInteger( dq->u_long_value2, data_type );
+                size += amount;
+            }
         }
-        break;
-    case QDT_SHORT:
-    case QDT_USHORT:
-        DGInteger( dq->u_long_value1, TY_UINT_2 );
-        size += TARGET_SHORT;
-        if( dq->flags & Q_2_INTS_IN_ONE ) {
-            DGInteger( dq->u_long_value2, TY_UINT_2 );
-            size += TARGET_SHORT;
-        }
-        break;
-    case QDT_INT:
-    case QDT_UINT:
-        DGInteger( dq->u_long_value1, TY_INTEGER );
-        size += TARGET_INT;
-        if( dq->flags & Q_2_INTS_IN_ONE ) {
-            DGInteger( dq->u_long_value2, TY_INTEGER );
-            size += TARGET_INT;
-        }
-        break;
-    case QDT_LONG:
-    case QDT_ULONG:
-        DGInteger( dq->u_long_value1, TY_UINT_4 );
-        size += TARGET_LONG;
-        if( dq->flags & Q_2_INTS_IN_ONE ) {
-            DGInteger( dq->u_long_value2, TY_UINT_4 );
-            size += TARGET_LONG;
-        }
-        break;
-    case QDT_LONG64:
-    case QDT_ULONG64:
-        DGInteger64( dq->u.long64, TY_UINT_8 );
-        size += TARGET_LONG64;
+        size += amount;
         break;
 
-    case QDT_FLOAT:
-    case QDT_FIMAGINARY:
+    case TYP_FLOAT:
+    case TYP_FIMAGINARY:
 //        ftoa( dq->u.double_value, Buffer );
 //        DGFloat( Buffer, TY_SINGLE );
         {
@@ -193,28 +176,31 @@ static void EmitDQuad( DATA_QUAD *dq )
             local_dq.u_long_value1 = dq->u_long_value1;
             local_dq.u_long_value2 = dq->u_long_value2;
             float_value = (float)local_dq.u.double_value;
-            DGBytes( TARGET_FLOAT, (char *)&float_value );
+            amount = CTypeSize( (DATA_TYPE)dq->type );
+            DGBytes( amount, (char *)&float_value );
         }
-        size += TARGET_FLOAT;
+        size += amount;
         break;
-    case QDT_DOUBLE:
-    case QDT_DIMAGINARY:
+    case TYP_DOUBLE:
+    case TYP_DIMAGINARY:
 //        ftoa( dq->u.double_value, Buffer );
 //        DGFloat( Buffer, TY_DOUBLE );
-        DGBytes( TARGET_DOUBLE, (char *)&dq->u.double_value );
-        size += TARGET_DOUBLE;
+        amount = CTypeSize( (DATA_TYPE)dq->type );
+        DGBytes( amount, (char *)&dq->u.double_value );
+        size += amount;
         break;
-    case QDT_LONG_DOUBLE:
-    case QDT_LDIMAGINARY:
-        DGBytes( TARGET_LDOUBLE, (char *)&dq->u.long_double_value );
-        size += TARGET_LDOUBLE;
+    case TYP_LONG_DOUBLE:
+    case TYP_LDIMAGINARY:
+        amount = CTypeSize( (DATA_TYPE)dq->type );
+        DGBytes( amount, (char *)&dq->u.long_double_value );
+        size += amount;
         break;
     case QDT_STRING:
         data_type = GetDQuadPointerCGType( dq->flags );
         EmitStrPtr( dq->u.string_leaf, data_type );
         size += GetDQuadPointerSize( dq->flags );
         break;
-    case QDT_POINTER:
+    case TYP_POINTER:
     case QDT_ID:
         data_type = GetDQuadPointerCGType( dq->flags );
         if( dq->u.var.sym_handle == SYM_NULL ) {

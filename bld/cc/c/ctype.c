@@ -54,7 +54,19 @@ static void CheckBitfieldType( TYPEPTR typ );
  * matches enum DataType in ctypes.h
  */
 static unsigned char  CTypeSizes[] = {
-    #define pick1(type,dtype,cgtype,x86asmtype,name,size) size,
+    #define pick1(type,signedness,size,alignment) size,
+    #include "cdatatyp.h"
+    #undef  pick1
+};
+
+static unsigned char  CTypeAlignments[] = {
+    #define pick1(type,signedness,size,alignment) alignment,
+    #include "cdatatyp.h"
+    #undef  pick1
+};
+
+static unsigned char  CTypeSigns[] = {
+    #define pick1(type,signedness,size,alignment) signedness,
     #include "cdatatyp.h"
     #undef  pick1
 };
@@ -882,6 +894,9 @@ align_type GetTypeAlignment( TYPEPTR typ )
             size = 8;
         }
 #endif
+    } else if( typ->decl_type < DATA_TYPE_SIZE
+      && CTypeAlignment( typ->decl_type ) != 0 ) {
+        size = CTypeAlignment( typ->decl_type );
     } else {
         size = (align_type)TypeSize( typ );
     }
@@ -1578,6 +1593,21 @@ TYPEPTR FuncNode( TYPEPTR return_typ, type_modifiers flag, TYPEPTR *parm_types )
 target_size TypeSize( TYPEPTR typ )
 {
     return( TypeSizeEx( typ, NULL ) );
+}
+
+target_size CTypeSize( DATA_TYPE dtype )
+{
+    return( CTypeSizes[dtype] );
+}
+
+align_type CTypeAlignment( DATA_TYPE dtype )
+{
+    return( CTypeAlignments[dtype] );
+}
+
+c_type_sign CTypeSignedness( DATA_TYPE dtype )
+{
+    return( CTypeSigns[dtype] );
 }
 
 target_size TypeSizeEx( TYPEPTR typ, bitfield_width *pFieldWidth )
