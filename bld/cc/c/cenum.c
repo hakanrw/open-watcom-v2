@@ -44,12 +44,6 @@
 #   define i64val(h,l) { l, h }
 #endif
 
-#if _CPU == 8086
-#define ENUM_INT    ENUM_S16
-#else
-#define ENUM_INT    ENUM_S32
-#endif
-
 enum enum_rng {
     ENUM_UNDEF = -1,
     ENUM_S8,
@@ -80,26 +74,35 @@ static uint64 const RangeTable[ENUM_SIZE][2] =
     { i64val( 0x00000000, 0x00000000 ),i64val( 0xFFFFFFFF, 0xFFFFFFFF ) },//u64
 };
 
-struct {
-    DATA_TYPE decl_type;
-    target_size size;
-} ItypeTable[ENUM_SIZE] = {
-    { TYP_CHAR,     TARGET_CHAR },      //S8
-    { TYP_UCHAR,    TARGET_CHAR },      //U8
-#if _CPU == 8086
-    { TYP_INT,      TARGET_INT },       //S16
-    { TYP_UINT,     TARGET_INT },       //U16
-    { TYP_LONG,     TARGET_LONG },      //S32
-    { TYP_ULONG,    TARGET_LONG },      //U32
-#else
-    { TYP_SHORT,    TARGET_SHORT },     //S16
-    { TYP_USHORT,   TARGET_SHORT },     //U16
-    { TYP_INT,      TARGET_INT },       //S32
-    { TYP_UINT,     TARGET_INT },       //U32
-#endif
-    { TYP_LONG64,   TARGET_LONG64 },    //S64
-    { TYP_ULONG64,  TARGET_LONG64 },    //U64
-};
+static enum enum_rng EnumIntIndex( void )
+{
+    if( CTypeSize( TYP_INT ) == 2 ) {
+        return( ENUM_S16 );
+    }
+    return( ENUM_S32 );
+}
+
+static DATA_TYPE EnumType( enum enum_rng index )
+{
+    static const DATA_TYPE signed_types[] = {
+        TYP_INT, TYP_LONG, TYP_LONG64, TYP_SHORT, TYP_CHAR
+    };
+    static const DATA_TYPE unsigned_types[] = {
+        TYP_UINT, TYP_ULONG, TYP_ULONG64, TYP_USHORT, TYP_UCHAR
+    };
+    const DATA_TYPE    *types;
+    unsigned           size;
+    unsigned           type_index;
+
+    types = ( index & 1 ) ? unsigned_types : signed_types;
+    size = 1U << ( index / 2 );
+    for( type_index = 0; type_index < sizeof( signed_types ) / sizeof( signed_types[0] ); ++type_index ) {
+        if( CTypeSize( types[type_index] ) == size ) {
+            return( types[type_index] );
+        }
+    }
+    return( types[2] );
+}
 
 void EnumInit( void )
 {
@@ -204,7 +207,7 @@ TYPEPTR EnumDecl( type_modifiers flags )
         char            buff[50];
 
         if( CompFlags.make_enums_an_int ) {
-            start_index = ENUM_INT;
+            start_index = EnumIntIndex();
         } else {
             start_index = ENUM_S8;
         }
@@ -264,9 +267,9 @@ TYPEPTR EnumDecl( type_modifiers flags )
                 }
             }
             error = ENUM_UNDEF;
-            if( index > ENUM_INT ) {
+            if( index > EnumIntIndex() ) {
                 if( !CompFlags.extensions_enabled ) {
-                    error = ENUM_INT;
+                    error = EnumIntIndex();
                 }
             }
             if( index >= ENUM_SIZE ) {
@@ -295,8 +298,8 @@ TYPEPTR EnumDecl( type_modifiers flags )
                 }
                 if( index > const_index ) {
                     const_index = index;
-                    typ->object = GetType( ItypeTable[const_index].decl_type );
-                    tag->size = ItypeTable[const_index].size;
+                    typ->object = GetType( EnumType( const_index ) );
+                    tag->size = CTypeSize( EnumType( const_index ) );
                 }
             }
             if( error != ENUM_UNDEF ) {

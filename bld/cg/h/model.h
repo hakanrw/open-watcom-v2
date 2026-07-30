@@ -34,6 +34,7 @@
 
 extern  cg_switches         Model;
 extern  cg_target_switches  TargetModel, SaveTargetModel;
+extern  cg_target_abi       CGTargetABI;
 extern  proc_revision       CGProcessorVersion;
 
 #define _IsModel( mdl )         ( ( Model & (mdl) ) != 0 )
@@ -41,6 +42,7 @@ extern  proc_revision       CGProcessorVersion;
 
 #define _IsTargetModel( mdl )   ( ( TargetModel & (mdl) ) != 0 )
 #define _IsntTargetModel( mdl ) ( ( TargetModel & (mdl) ) == 0 )
+#define _IsTargetABI( abi )     ( CGTargetABI == (abi) )
 
 #ifdef GET_CPU
     #define _CPULevel( v )  ( GET_CPU( CGProcessorVersion ) >= (v) )

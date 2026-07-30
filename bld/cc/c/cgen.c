@@ -1970,7 +1970,7 @@ void DoCompile( void )
             if( CompFlags.rent ) {
                 GenSwitches |= CGSW_GEN_POSITION_INDEPENDANT;
             }
-            cg_info = BEInit( GenSwitches, TargetSwitches, OptSize, ProcRevision );
+            cg_info = BEInit( GenSwitches, TargetSwitches, TargetABI, OptSize, ProcRevision );
             if( cg_info.revision != 0 || cg_info.target != 0 ) {
 #if _CPU == 386
                 if( TargetSwitches & (CGSW_X86_P5_PROFILING | CGSW_X86_NEW_P5_PROFILING) ) {

@@ -120,6 +120,7 @@ typedef struct pheader {
     unsigned        pack_amount;    // PackAmount
     unsigned        gen_switches;   // GenSwitches
     unsigned        target_switches;// TargetSwitches
+    unsigned        target_abi;     // TargetABI
     pragma_toggles  toggles;        // PragmaToggles
     unsigned        size;
     unsigned        macro_size;
@@ -285,6 +286,7 @@ static void OutPutHeader( void )
     pch.pack_amount       = PackAmount;
     pch.gen_switches      = GenSwitches;
     pch.target_switches   = TargetSwitches;
+    pch.target_abi        = TargetABI;
     pch.toggles           = PragmaToggles;
     pch.size              = PH_size - PH_MacroSize;
     pch.macro_size        = PH_MacroSize;
@@ -1752,7 +1754,9 @@ bool UsePreCompiledHeader( const char *filename )
         AbortPreCompiledHeader();
         return( false );
     }
-    if( pch.gen_switches != GenSwitches || pch.target_switches != TargetSwitches ) {
+    if( pch.gen_switches != GenSwitches
+      || pch.target_switches != TargetSwitches
+      || pch.target_abi != TargetABI ) {
         close( handle );
         PCHNote( PCHDR_DIFFERENT_OPTIONS );
         AbortPreCompiledHeader();

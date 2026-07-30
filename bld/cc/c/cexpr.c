@@ -243,11 +243,11 @@ static TREEPTR ConstLeaf( void )
     leaf->op.u1.const_type = ConstType;
     switch( ConstType ) {
     case TYP_WCHAR:
-#if TARGET_WCHAR == TARGET_UINT
-        leaf->op.u1.const_type = TYP_UINT;
-#else
-        leaf->op.u1.const_type = TYP_USHORT;
-#endif
+        if( TARGET_WCHAR == TARGET_UINT ) {
+            leaf->op.u1.const_type = TYP_UINT;
+        } else {
+            leaf->op.u1.const_type = TYP_USHORT;
+        }
         leaf->op.u2.long_value = U32FetchTrunc( Constant64 );
         break;
     case TYP_CHAR:
@@ -2793,15 +2793,11 @@ static TREEPTR SizeofOp( TYPEPTR typ )
             SetDiagPop();
         }
     }
-#if TARGET_INT < TARGET_LONG
-    if( size > TARGET_UINT_MAX ) {
+    if( TARGET_INT < TARGET_LONG && size > TARGET_UINT_MAX ) {
         tree = LongLeaf( size );
     } else {
         tree = UIntLeaf( size );
     }
-#else
-    tree = UIntLeaf( size );
-#endif
     return( tree );
 }
 

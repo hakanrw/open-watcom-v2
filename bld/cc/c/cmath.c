@@ -64,31 +64,27 @@
 #define ERR     TYP_ERROR       /* no real type behind this value */
 
 /*
- * define macros for promoted types
+ * Table markers whose result depends on the selected ABI's integer widths.
  */
-#if TARGET_INT == 4
+#define PUS     (DATA_TYPE_SIZE + 1)
+#define PUI     (DATA_TYPE_SIZE + 2)
 
-    /*
-     * Promoted Unsigned Short is Signed Int
-     */
-    #define PUS     TYP_INT
-    /*
-     * Promoted Unsigned Int is Unsigned Long
-     */
-    #define PUI     TYP_ULONG
-
-#else /* 16-bit ints */
-
-    /*
-     * Promoted Unsigned Short is Unsigned Int
-     */
-    #define PUS     TYP_UINT
-    /*
-     * Promoted Unsigned Int is Signed Long
-     */
-    #define PUI     TYP_LONG
-
-#endif
+static DATA_TYPE ResolveResultType( unsigned result_type )
+{
+    if( result_type == PUS ) {
+        if( CTypeSize( TYP_USHORT ) < CTypeSize( TYP_INT ) ) {
+            return( TYP_INT );
+        }
+        return( TYP_UINT );
+    }
+    if( result_type == PUI ) {
+        if( CTypeSize( TYP_UINT ) < CTypeSize( TYP_LONG ) ) {
+            return( TYP_LONG );
+        }
+        return( TYP_ULONG );
+    }
+    return( result_type );
+}
 
 /*
  * matches enum DATA_TYPE in ctypes.h
@@ -446,7 +442,7 @@ static DATA_TYPE BinExprTypeDT( DATA_TYPE typ1, DATA_TYPE typ2 )
 {
     DATA_TYPE   data_type;
 
-    data_type = BinResult[typ1][typ2];
+    data_type = ResolveResultType( BinResult[typ1][typ2] );
     return( data_type );
 }
 
@@ -593,11 +589,7 @@ static int NumSize( DATA_TYPE op_type )
         size = SIGN_BIT;
         /* fall through */
     case TYP_UINT:
-#if TARGET_INT == 2
-        size |= 16;
-#else
-        size |= 32;
-#endif
+        size |= TARGET_INT * CHAR_BIT;
         break;
     }
     return( size );
@@ -1272,7 +1264,7 @@ TREEPTR AddOp( TREEPTR op1, TOKEN opr, TREEPTR op2 )
     } else {
         switch( opr ) {
         case T_PLUS:
-            result_type = AddResult[op1_type][op2_type];
+            result_type = ResolveResultType( AddResult[op1_type][op2_type] );
             break;
         case T_PLUS_PLUS:
         case T_MINUS_MINUS:
@@ -1284,7 +1276,7 @@ TREEPTR AddOp( TREEPTR op1, TOKEN opr, TREEPTR op2 )
             result_type = op1_type;
             break;
         default:
-            result_type = SubResult[op1_type][op2_type];
+            result_type = ResolveResultType( SubResult[op1_type][op2_type] );
             if(( op1_type == PTR )&&( op2_type == PTR )) {
                 /*
                  * make sure both pointers are same type
@@ -1424,7 +1416,7 @@ TREEPTR BinOp( TREEPTR op1, TOKEN opr, TREEPTR op2 )
         /*
          * check for integral operand.
          */
-        result_type = IntResult[op1_type][op2_type];
+        result_type = ResolveResultType( IntResult[op1_type][op2_type] );
         if( result_type == ERR ) {
             CErr1( ERR_EXPR_MUST_BE_INTEGRAL );
         }
@@ -1591,7 +1583,7 @@ TREEPTR IntOp( TREEPTR op1, TOKEN opr, TREEPTR op2 )
     } else if( op1_type == TYP_UNION || op2_type == TYP_UNION ) {
         result_type = ERR;
     } else {
-        result_type = IntResult[op1_type][op2_type];
+        result_type = ResolveResultType( IntResult[op1_type][op2_type] );
     }
     if( result_type == ERR ) {
         CErr1( ERR_EXPR_MUST_BE_INTEGRAL );
@@ -1630,7 +1622,7 @@ TREEPTR ShiftOp( TREEPTR op1, TOKEN opr, TREEPTR op2 )
         result_type = TYP_VOID;
     } else {
         if( op1_type <= TYP_STRUCT ) {
-            result_type = ShiftResult[op1_type];
+            result_type = ResolveResultType( ShiftResult[op1_type] );
         } else {
             result_type = ERR;
         }
@@ -2003,7 +1995,7 @@ TREEPTR UMinus( TREEPTR opnd )
                 opnd = ErrorNode( opnd );
             } else {
                 opnd = ExprNode( NULL, OPR_NEG, opnd );
-                opnd->u.expr_type = GetType( SubResult[t][t] );
+                opnd->u.expr_type = GetType( ResolveResultType( SubResult[t][t] ) );
                 opnd->op.u2.result_type = opnd->u.expr_type;
             }
         }
@@ -2056,7 +2048,7 @@ TREEPTR UMinus( TREEPTR opnd )
             opnd = ErrorNode( opnd );
         } else {
             opnd = ExprNode( NULL, OPR_NEG, opnd );
-            opnd->u.expr_type = GetType( SubResult[t][t] );
+            opnd->u.expr_type = GetType( ResolveResultType( SubResult[t][t] ) );
             opnd->op.u2.result_type = opnd->u.expr_type;
         }
         break;
@@ -2082,7 +2074,7 @@ TREEPTR UComplement( TREEPTR opnd )
                 opnd = ErrorNode( opnd );
             } else {
                 opnd = ExprNode( NULL, OPR_COM, opnd );
-                opnd->u.expr_type = GetType( SubResult[t][t] );
+                opnd->u.expr_type = GetType( ResolveResultType( SubResult[t][t] ) );
                 opnd->op.u2.result_type = opnd->u.expr_type;
             }
         }
@@ -2124,7 +2116,7 @@ TREEPTR UComplement( TREEPTR opnd )
             opnd = ErrorNode( opnd );
         } else {
             opnd = ExprNode( NULL, OPR_COM, opnd );
-            opnd->u.expr_type = GetType( SubResult[t][t] );
+            opnd->u.expr_type = GetType( ResolveResultType( SubResult[t][t] ) );
             opnd->op.u2.result_type = opnd->u.expr_type;
         }
         break;
@@ -2203,7 +2195,7 @@ TYPEPTR TernType( TREEPTR true_part, TREEPTR false_part )
      * (arithmetic type) : (arithmetic type)    -> (promoted arithmetic type)
      */
     if( (dtype1 <= TYP_LONG_DOUBLE) && (dtype2 <= TYP_LONG_DOUBLE) ) {
-        return( GetType( SubResult[dtype1][dtype2] ) );
+        return( GetType( ResolveResultType( SubResult[dtype1][dtype2] ) ) );
     }
     CheckTernary( typ1, typ2 );
     if( dtype1 == TYP_POINTER && dtype2 == TYP_POINTER ) {

@@ -29,13 +29,21 @@
 ****************************************************************************/
 
 
-/*  size of data types on target machine */
-
 #ifndef _TARGET_INCLUDED
 #define _TARGET_INCLUDED
-#include "target32.h"
 #include "targdef.h"
 #include "langenvd.h"
+#include "ctargabi.h"
+
+typedef short               target_short;
+typedef unsigned short      target_ushort;
+typedef int                 target_int;
+typedef unsigned int        target_uint;
+typedef int                 target_long;
+typedef unsigned int        target_ulong;
+
+typedef int                 target_ssize;
+typedef unsigned int        target_size;
 
 #define _CPU            _PPC
 

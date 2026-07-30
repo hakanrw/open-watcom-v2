@@ -32,8 +32,8 @@
 
 
 CGAPIDEF( BEMemInit,    void,           (pointer) )
-CGAPIDEF( BEInitCg,     cg_init_info,   (cg_switches,cg_target_switches,uint,proc_revision) )
-CGAPIDEF( BEInit,       cg_init_info,   (cg_switches,cg_target_switches,uint,proc_revision) )
+CGAPIDEF( BEInitCg,     cg_init_info,   (cg_switches,cg_target_switches,cg_target_abi,uint,proc_revision) )
+CGAPIDEF( BEInit,       cg_init_info,   (cg_switches,cg_target_switches,cg_target_abi,uint,proc_revision) )
 CGAPIDEF( BEStart,      void,           (void) )
 CGAPIDEF( BEStop,       void,           (void) )
 CGAPIDEF( BEAbort,      void,           (void) )

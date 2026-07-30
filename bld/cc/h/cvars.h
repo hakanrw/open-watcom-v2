@@ -245,6 +245,9 @@ global char         *TokenBuf;
 
 global cg_switches  GenSwitches;        /* target independant switches for code generator */
 global cg_target_switches TargetSwitches; /* target specific code generator switches */
+global cg_target_abi TargetABI;          /* target ABI selected by the front end */
+global const target_abi_info *TargetInfo; /* dimensions for TargetABI */
+extern const target_abi_info TargetABIs[CG_ABI_COUNT];
 
 global unsigned     ProcRevision;       /* processor revision for c.g. */
 global char         *GenCodeGroup;      /* pointer to code group name */
@@ -780,6 +783,7 @@ extern void         TimeInit( void );
 /* ctype.c */
 extern void         CTypeInit( void );
 extern void         InitTypeHashTables( void );
+extern void         CTypeSetTargetABI( void );
 extern void         SetSignedChar( void );
 extern TYPEPTR      GetType( DATA_TYPE );
 extern TYPEPTR      ArrayNode( TYPEPTR );

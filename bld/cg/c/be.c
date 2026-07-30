@@ -74,13 +74,14 @@ extern  void            FiniDbgInfo();
 
 
 extern  cg_init_info    BEInit( cg_switches cg_data, cg_target_switches tg_data,
-                                uint opt_size, proc_revision proc ) {
+                                cg_target_abi abi, uint opt_size, proc_revision proc ) {
 //===================================================================
 
     cg_init_info        cg_info;
     int                 i;
 
     Model = cg_data;
+    CGTargetABI = abi;
     if( EnvVar( "ACTION_STDOUT" ) ) {
         Actions = FStdOut();
     } else {
@@ -89,7 +90,7 @@ extern  cg_init_info    BEInit( cg_switches cg_data, cg_target_switches tg_data,
     ++FilesOpen;
     Action( "BEInit switches==" );
     Action( "%h %h", cg_data, tg_data );
-    Action( ", opt_size==%d, proc_rev=%h%n", opt_size, proc );
+    Action( ", abi==%h, opt_size==%d, proc_rev=%h%n", abi, opt_size, proc );
     SymDebug = 0;
     TypDebug = 0;
     if( cg_data & CGSW_GEN_DBG_LOCALS ) {

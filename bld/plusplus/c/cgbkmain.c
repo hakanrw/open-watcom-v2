@@ -3142,7 +3142,7 @@ void CgBackEnd(                 // BACK-END CONTROLLER
 #endif
     CtxSetCurrContext( CTX_CG_FUNC );
     if( BELoad( NULL ) ) {
-        cg_info = BEInitCg( GenSwitches, TargetSwitches, OptSize, CpuSwitches );
+        cg_info = BEInitCg( GenSwitches, TargetSwitches, CG_ABI_DEFAULT, OptSize, CpuSwitches );
         if( cg_info.revision == 0 && cg_info.target == 0 ) {
             CErr1( ERR_CODEGEN_CANT_INITIALIZE );
             CSuicide();

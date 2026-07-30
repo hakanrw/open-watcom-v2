@@ -126,6 +126,7 @@ void _CGAPI     BEMemInit( pointer trmemhdl )
 
 cg_init_info _CGAPI     BEInitCg( cg_switches switches,
                                     cg_target_switches platform,
+                                    cg_target_abi abi,
                                     uint optsize,
                                     proc_revision proc )
 /**************************************************************/
@@ -147,12 +148,13 @@ cg_init_info _CGAPI     BEInitCg( cg_switches switches,
 #endif
     Model = switches;
     TargetModel = platform;
+    CGTargetABI = abi;
 #ifdef QNX_FLAKEY
     OrigModel = switches;
 #endif
 #ifdef DEVBUILD
     EchoAPIInit();
-    EchoAPI( "BEInit( %x, %x, %i, %x )\n", switches, platform, optsize, proc );
+    EchoAPI( "BEInit( %x, %x, %x, %i, %x )\n", switches, platform, abi, optsize, proc );
     // must be after Model is set and before InitDBGInfo call
 #endif
     CGProcessorVersion = proc;
@@ -185,11 +187,12 @@ cg_init_info _CGAPI     BEInitCg( cg_switches switches,
 
 cg_init_info _CGAPI     BEInit( cg_switches switches,
                                 cg_target_switches platform,
+                                cg_target_abi abi,
                                 uint optsize, proc_revision proc )
 /****************************************************************/
 {
     BEMemInit( NULL );
-    return( BEInitCg( switches, platform, optsize, proc ) );
+    return( BEInitCg( switches, platform, abi, optsize, proc ) );
 }
 
 void _CGAPI     BEStart( void )

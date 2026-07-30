@@ -135,11 +135,9 @@ static bool CheckParmPromotion( TYPEPTR typ )
         }
         break;
     case TYP_USHORT:
-#if TARGET_SHORT != TARGET_INT
-        if( CompFlags.strict_ANSI )  {
+        if( TARGET_SHORT != TARGET_INT && CompFlags.strict_ANSI )  {
             return( false );
         }
-#endif
         break;
     case TYP_FLOAT:
         return( false );
