@@ -102,7 +102,7 @@ host_bits_str_echo = ($(host_bits)-bit)
 
 !ifdef buildtest
 ! ifdef __OS2__
-path_wcc = $(%OWROOT)\bld\cc\386\os2386.dll\$(%OWOBJDIR);$(%OWROOT)\bld\cc\i86\os2386.dll\$(%OWOBJDIR)
+path_wcc = $(%OWROOT)\bld\cc\intel\386\os2386.dll\$(%OWOBJDIR);$(%OWROOT)\bld\cc\intel\i86\os2386.dll\$(%OWOBJDIR)
 path_wpp = $(%OWROOT)\bld\plusplus\386\os2386.dll;$(%OWROOT)\bld\plusplus\i86\os2386.dll
 path_wfc = $(%OWROOT)\bld\f77\wfc\386\os2386;$(%OWROOT)\bld\f77\wfc\i86\os2386
 path_wlib = $(%OWROOT)\bld\nwlib\os2386.dll
@@ -114,7 +114,7 @@ $(%OWROOT)\bld\cpplib\rtdll\os2.386\mf_r;$(%OWROOT)\bld\cpplib\rtdll\os2.386\mf_
 $(%OWROOT)\bld\mathlib\rtdll\os2.386\mf_r;$(%OWROOT)\bld\mathlib\rtdll\os2.386\mf_s;&
 $(%OWROOT)\bld\mathlib\rtdll\os2.387\mf_r;$(%OWROOT)\bld\mathlib\rtdll\os2.387\mf_s
 ! else ifdef __NTAXP__
-path_wcc = $(%OWROOT)\bld\cc\axp\ntaxp.dll\$(%OWOBJDIR)
+path_wcc = $(%OWROOT)\bld\cc\risc\axp\ntaxp.dll\$(%OWOBJDIR)
 path_wpp = $(%OWROOT)\bld\plusplus\axp\ntaxp.dll
 path_wfc = $(%OWROOT)\bld\f77\wfc\axp\ntaxp
 path_wlib = $(%OWROOT)\bld\nwlib\ntaxp.dll
@@ -124,7 +124,7 @@ path_rtdll = $(%OWROOT)\bld\clib\rtdll\winnt.axp\mf_r;$(%OWROOT)\bld\clib\rtdll\
 $(%OWROOT)\bld\cpplib\rtdll\winnt.axp\mf_r;$(%OWROOT)\bld\cpplib\rtdll\winnt.axp\mf_s;&
 $(%OWROOT)\bld\mathlib\rtdll\winnt.axp\mf_r;$(%OWROOT)\bld\mathlib\rtdll\winnt.axp\mf_s
 ! else ifdef __NT386__
-path_wcc = $(%OWROOT)\bld\cc\386\nt386.dll\$(%OWOBJDIR);$(%OWROOT)\bld\cc\i86\nt386.dll\$(%OWOBJDIR)
+path_wcc = $(%OWROOT)\bld\cc\intel\386\nt386.dll\$(%OWOBJDIR);$(%OWROOT)\bld\cc\intel\i86\nt386.dll\$(%OWOBJDIR)
 path_wpp = $(%OWROOT)\bld\plusplus\386\nt386.dll;$(%OWROOT)\bld\plusplus\i86\nt386.dll
 path_wfc = $(%OWROOT)\bld\f77\wfc\386\nt386;$(%OWROOT)\bld\f77\wfc\i86\nt386
 path_wlib = $(%OWROOT)\bld\nwlib\nt386.dll
@@ -136,14 +136,14 @@ $(%OWROOT)\bld\mathlib\rtdll\winnt.386\mf_r;$(%OWROOT)\bld\mathlib\rtdll\winnt.3
 $(%OWROOT)\bld\mathlib\rtdll\winnt.387\mf_r;$(%OWROOT)\bld\mathlib\rtdll\winnt.387\mf_s
 ! else ifdef __NTX64__
 !  ifeq host 386
-path_wcc = $(%OWROOT)\bld\cc\386\nt386.dll\$(%OWOBJDIR)
+path_wcc = $(%OWROOT)\bld\cc\intel\386\nt386.dll\$(%OWOBJDIR)
 path_wpp = $(%OWROOT)\bld\plusplus\386\nt386.dll
 path_wfc = $(%OWROOT)\bld\f77\wfc\386\nt386
 path_wlib = $(%OWROOT)\bld\nwlib\nt386.dll
 path_wlink = $(%OWROOT)\bld\wl\nt386.dll
 path_wasm = $(%OWROOT)\bld\wasm\nt386
 !  else
-path_wcc = $(%OWROOT)\bld\cc\386\ntx64.dll\$(%OWOBJDIR)
+path_wcc = $(%OWROOT)\bld\cc\intel\386\ntx64.dll\$(%OWOBJDIR)
 path_wpp = $(%OWROOT)\bld\plusplus\386\ntx64.dll
 path_wfc = $(%OWROOT)\bld\f77\wfc\386\ntx64
 path_wlib = $(%OWROOT)\bld\nwlib\ntx64.dll
@@ -155,14 +155,14 @@ $(%OWROOT)\bld\cpplib\rtdll\winnt.386\mf_r;$(%OWROOT)\bld\cpplib\rtdll\winnt.386
 $(%OWROOT)\bld\mathlib\rtdll\winnt.386\mf_r;$(%OWROOT)\bld\mathlib\rtdll\winnt.386\mf_s;&
 $(%OWROOT)\bld\mathlib\rtdll\winnt.387\mf_r;$(%OWROOT)\bld\mathlib\rtdll\winnt.387\mf_s
 ! else ifdef __DOS__
-path_wcc = $(%OWROOT)\bld\cc\386\dos386\$(%OWOBJDIR);$(%OWROOT)\bld\cc\i86\dos386\$(%OWOBJDIR)
+path_wcc = $(%OWROOT)\bld\cc\intel\386\dos386\$(%OWOBJDIR);$(%OWROOT)\bld\cc\intel\i86\dos386\$(%OWOBJDIR)
 path_wpp = $(%OWROOT)\bld\plusplus\386\dos386;$(%OWROOT)\bld\plusplus\i86\dos386
 path_wfc = $(%OWROOT)\bld\f77\wfc\386\dos386;$(%OWROOT)\bld\f77\wfc\i86\dos386
 path_wlib = $(%OWROOT)\bld\nwlib\dos386
 path_wlink = $(%OWROOT)\bld\wl\dos386
 path_wasm = $(%OWROOT)\bld\wasm\dos386
 ! else ifdef __LINUX386__
-path_wcc = $(%OWROOT)/bld/cc/386/linux386/$(%OWOBJDIR):$(%OWROOT)/bld/cc/i86/linux386/$(%OWOBJDIR)
+path_wcc = $(%OWROOT)/bld/cc/intel/386/linux386/$(%OWOBJDIR):$(%OWROOT)/bld/cc/intel/i86/linux386/$(%OWOBJDIR)
 path_wpp = $(%OWROOT)/bld/plusplus/386/linux386:$(%OWROOT)/bld/plusplus/i86/linux386
 path_wfc = $(%OWROOT)/bld/f77/wfc/386/linux386:$(%OWROOT)/bld/f77/wfc/i86/linux386
 path_wlib = $(%OWROOT)/bld/nwlib/linux386
@@ -170,14 +170,14 @@ path_wlink = $(%OWROOT)/bld/wl/linux386
 path_wasm = $(%OWROOT)/bld/wasm/linux386
 ! else ifdef __LINUXX64__
 !  ifeq host 386
-path_wcc = $(%OWROOT)/bld/cc/386/linux386/$(%OWOBJDIR):$(%OWROOT)/bld/cc/i86/linux386/$(%OWOBJDIR)
+path_wcc = $(%OWROOT)/bld/cc/intel/386/linux386/$(%OWOBJDIR):$(%OWROOT)/bld/cc/intel/i86/linux386/$(%OWOBJDIR)
 path_wpp = $(%OWROOT)/bld/plusplus/386/linux386:$(%OWROOT)/bld/plusplus/i86/linux386
 path_wfc = $(%OWROOT)/bld/f77/wfc/386/linux386:$(%OWROOT)/bld/f77/wfc/i86/linux386
 path_wlib = $(%OWROOT)/bld/nwlib/linux386
 path_wlink = $(%OWROOT)/bld/wl/linux386
 path_wasm = $(%OWROOT)/bld/wasm/linux386
 !  else
-path_wcc = $(%OWROOT)/bld/cc/386/linuxx64/$(%OWOBJDIR):$(%OWROOT)/bld/cc/i86/linuxx64/$(%OWOBJDIR)
+path_wcc = $(%OWROOT)/bld/cc/intel/386/linuxx64/$(%OWOBJDIR):$(%OWROOT)/bld/cc/intel/i86/linuxx64/$(%OWOBJDIR)
 path_wpp = $(%OWROOT)/bld/plusplus/386/linuxx64:$(%OWROOT)/bld/plusplus/i86/linuxx64
 path_wfc = $(%OWROOT)/bld/f77/wfc/386/linuxx64:$(%OWROOT)/bld/f77/wfc/i86/linuxx64
 path_wlib = $(%OWROOT)/bld/nwlib/linuxx64
